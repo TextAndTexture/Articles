@@ -352,7 +352,7 @@
     <!-- صفحه بارگذاری همگام‌سازی -->
     <div id="sync-overlay" style="display: none;">
         <div class="spinner"></div>
-        <h2 id="sync-text" style="font-weight: 700; margin:0;">در حال دریافت اطلاعات جدید...</h2>
+        <h2 id="sync-text" style="font-weight: 700; margin:0;">در حال همگام‌سازی خودکار با سرور...</h2>
         <p style="opacity: 0.7; margin-top: 10px; font-weight: 300;">لطفا شکیبا باشید</p>
     </div>
 
@@ -1504,11 +1504,11 @@
     "articles": [
         {
             "id": "art-1775075992848",
-            "title": "عنوان مقاله جدید",
-            "desc": "توضیحات کوتاه مقاله را اینجا بنویسید...",
-            "link": "#",
+            "title": "بهار دلنشین",
+            "desc": "بدون توضیحات",
+            "link": "article_1775076487116.html",
             "image": "",
-            "author": "نام نویسنده",
+            "author": "نویسنده ناشناس",
             "date": "۱۴۰۵/۱/۱۳"
         },
         {
@@ -1524,7 +1524,7 @@
 }</script>
 
     <!-- پنجره ادیتور (مخفی در حالت عادی) -->
-    <div id="editor-modal">
+    <div id="editor-modal" class="active">
         <div id="editor-modal-header">
             <h3 style="margin: 0; color: var(--text-main);">✍️ در حال نوشتن مقاله...</h3>
             <button class="btn-action btn-outline" style="width: auto; margin:0; padding: 8px 20px;" onclick="closeEditorModal()">بستن و انصراف ✖</button>
@@ -1585,8 +1585,9 @@
 
         <!-- دکمه‌های همگام‌سازی و ذخیره -->
         <div class="ctrl-group">
+            <button class="btn-action btn-outline" style="border-color: #8b5cf6; color: #8b5cf6; background: rgba(139, 92, 246, 0.1);" onclick="updateGitHubTokenUI()">🔑 تغییر/تنظیم توکن گیت‌هاب</button>
             <button class="btn-action btn-outline" style="border-color: #3b82f6; color: #3b82f6; background: rgba(59, 130, 246, 0.1);" onclick="fetchLatestDataFromServer(false)">🔄 دریافت آخرین تغییرات سرور</button>
-            <button id="btn-save-admin" class="btn-action btn-primary" style="background-color: #3b82f6;" onclick="saveAdminPanelToGitHub()" disabled="">⏳ در حال ذخیره...</button>
+            <button id="btn-save-admin" class="btn-action btn-primary" style="background-color: #3b82f6;" onclick="saveAdminPanelToGitHub()">☁️ ذخیره پنل در سرور (آنلاین)</button>
             <button class="btn-action btn-outline" onclick="saveProjectJSON()">💾 خروجی بک‌آپ (JSON)</button>
             <button class="btn-action btn-outline" onclick="triggerFileInput('jsonLoadInput')">📂 بارگذاری بک‌آپ</button>
             <input type="file" id="jsonLoadInput" class="hidden-file" accept=".json" onchange="loadProjectJSON(event)">
@@ -1611,6 +1612,24 @@
                 localStorage.setItem('my_gh_token', GITHUB_TOKEN.trim());
             } else {
                 alert('هشدار: بدون توکن گیت‌هاب ارتباط با سرور قطع خواهد بود!');
+            }
+        }
+
+        // تابع جدید برای آپدیت دستی توکن
+        function updateGitHubTokenUI() {
+            const currentToken = localStorage.getItem('my_gh_token') || '';
+            const newToken = prompt('لطفاً توکن گیت‌هاب جدید خود را وارد کنید:\n(برای حذف توکن فعلی، این کادر را خالی بگذارید و تایید کنید)', currentToken);
+            
+            if (newToken !== null) { // اگر کاربر Cancel نکرده باشد
+                if (newToken.trim() === '') {
+                    localStorage.removeItem('my_gh_token');
+                    GITHUB_TOKEN = null;
+                    alert('توکن شما از حافظه مرورگر پاک شد.');
+                } else {
+                    localStorage.setItem('my_gh_token', newToken.trim());
+                    GITHUB_TOKEN = newToken.trim();
+                    alert('توکن با موفقیت به‌روزرسانی شد!');
+                }
             }
         }
         // ==========================================
@@ -1756,9 +1775,9 @@
             const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/admin.html?ref=${BRANCH}`;
             
             try {
-                // اضافه کردن تایم‌استمپ برای دور زدن کش سرور
+                // اضافه کردن تایم‌استمپ برای دور زدن کش مرورگر بدون ایجاد مشکل CORS
                 const response = await fetch(url + '&t=' + Date.now(), {
-                    headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Cache-Control': 'no-cache' }
+                    headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
                 });
 
                 if (response.ok) {
@@ -1845,7 +1864,6 @@
             renderGrid();
         }
 
-        // تابع بستن مودال اصلاح شد
         function closeEditorModal() {
             document.getElementById('editor-modal').classList.remove('active');
         }
