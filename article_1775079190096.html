@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست مقاله</title>
+    
+    <!-- سیستم خودترمیم: اگر داخل پنل مدیریت باز شود به ادیتور تبدیل می‌شود -->
+    <script>
+        if (window.PARENT_ARTICLE_ID) {
+            window.onload = function() {
+                var rawScript = document.getElementById('raw-editor-html');
+                if (rawScript) {
+                    var editorHtml = unescape(decodeURIComponent(rawScript.textContent));
+                    document.open();
+                    document.write(editorHtml);
+                    document.close();
+                }
+            };
+        }
+    </script>
+
+    <style id="custom-fonts-export">
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap');
+        
+    </style>
+    <style>
+        :root {
+            --bg-color: #fdfdfd; --text-color: #2b2b2b; --primary-color: #0056b3;
+            --border-color: #e0e4e8; --sidebar-bg: #f8f9fa; --intro-bg: #f4f6f9;
+        }
+        
+        html[data-theme="dark"] {
+            --bg-color: #18181b; --text-color: #f4f4f5; --primary-color: #60a5fa;
+            --border-color: #3f3f46; --sidebar-bg: #27272a; --intro-bg: #27272a;
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif !important;
+            background-color: var(--bg-color) !important; color: var(--text-color) !important;
+            margin: 0; padding: 0; line-height: 1.8; transition: background-color 0.3s, color 0.3s;
+        }
+
+        html[data-theme="dark"] .main-content *:not(blockquote):not(.custom-highlight):not(.img-caption):not(.img-wrapper):not(.custom-html-wrapper):not(iframe) {
+            background-color: transparent !important; color: var(--text-color) !important;
+        }
+
+        .export-container { display: flex; max-width: 1200px; margin: 0 auto; padding: 2vw; gap: 4vw; align-items: flex-start; flex-direction: row; }
+        .main-content { flex: 3; min-width: 0; }
+        .sidebar { flex: 1; position: sticky; top: 2vw; background: var(--sidebar-bg); padding: 2vw; border-radius: 1vw; border: 1px solid var(--border-color); transition: background-color 0.3s, border-color 0.3s; }
+        
+        h1 { color: var(--primary-color) !important; font-size: 2.5em; margin-bottom: 0.2em; }
+        .subtitle-meta { font-size: 1.5em; opacity: 0.8; margin-top: -0.2em; margin-bottom: 1em; font-weight: normal; }
+        .author-meta { opacity: 0.7; margin-bottom: 1em; }
+        .intro-meta { font-style: italic; border-right: 4px solid var(--border-color); padding-right: 1em; background-color: var(--intro-bg); padding: 1.5em; margin-bottom: 2em; transition: background-color 0.3s; }
+        img { max-width: 100%; border-radius: 0.5vw; margin: 1.5em auto; display: block; }
+        
+        .img-wrapper { position: relative; width: fit-content; margin: 1.5em auto; border-radius: 0.5vw; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 100%; }
+        .img-wrapper img { margin: 0; display: block; border-radius: 0; box-shadow: none; width: 100%; height: auto; }
+        .img-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 40px 15px 15px; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)); color: white !important; text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,0.8); font-size: 0.95em; pointer-events: none; }
+        
+        .article-thumbnail { width: 100%; max-height: 50vh; object-fit: cover; border-radius: 1vw; margin-bottom: 2.5em; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+
+        p { margin-bottom: 1em; }
+        blockquote { border-right: 4px solid var(--primary-color) !important; background-color: var(--intro-bg); padding: 1em 1.5em; margin: 1.5em 0; font-style: italic; border-radius: 0.5em 0 0 0.5em; transition: background-color 0.3s;}
+        .custom-html-wrapper { margin: 1.5em 0; }
+        .force-app-font, .force-app-font * { font-family: 'Vazirmatn', sans-serif !important; }
+        .custom-highlight { color: #ff8c00 !important; font-weight: bold; }
+        
+        .toc-title { font-weight: bold; margin-bottom: 1em; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5em; }
+        .toc-list a { display: block; text-decoration: none; color: inherit; margin-bottom: 0.5em; transition: color 0.2s; }
+        html[data-theme="dark"] .toc-list a { color: var(--text-muted) !important; }
+        .toc-list a:hover, .toc-list a.active { color: var(--primary-color) !important; font-weight: bold; }
+        
+        .toc-h2 { padding-right: 0; font-weight: bold; margin-top: 10px; }
+        .toc-h3 { padding-right: 20px; font-size: 0.9em; opacity: 0.8; position: relative; }
+        .toc-h3::before { content: "•"; position: absolute; right: 8px; opacity: 0.5; }
+        .toc-h4 { padding-right: 40px; font-size: 0.85em; opacity: 0.7; position: relative; }
+        .toc-h4::before { content: "-"; position: absolute; right: 26px; opacity: 0.3; }
+
+        .progress-container { width: 100%; height: 8px; background-color: var(--border-color); border-radius: 4px; margin-top: 1.5em; overflow: hidden;}
+        .progress-bar { height: 100%; background: var(--primary-color); width: 0%; border-radius: 4px; }
+        .progress-text { font-size: 0.8em; opacity: 0.7; margin-top: 0.5em; }
+
+        .theme-toggle { position: fixed; bottom: 20px; left: 20px; background-color: var(--primary-color); color: white !important; border: none; padding: 0; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2em; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 10000; transition: transform 0.2s;}
+        .theme-toggle:active { transform: scale(0.9); }
+        
+        .toc-toggle-btn { display: none; }
+        .sidebar-overlay { display: none; }
+        .mobile-progress-container { display: none; }
+
+        footer { text-align: center; padding: 2em; opacity: 0.6; border-top: 1px solid var(--border-color); margin-top: 4em; }
+
+        @media (max-width: 768px) {
+            .export-container { flex-direction: column; padding: 15px; }
+            .main-content { width: 100%; padding: 0 5px; box-sizing: border-box; }
+            h1 { font-size: 1.8em; }
+            .subtitle-meta { font-size: 1.2em; }
+            p, blockquote { font-size: 1.05em; line-height: 2; }
+            
+            .sidebar { 
+                position: fixed !important; top: auto !important; bottom: 0 !important; left: 0 !important; right: 0 !important;
+                background-color: var(--sidebar-bg); z-index: 9998; 
+                max-height: 75vh !important; height: auto !important; overflow-y: auto; 
+                border-radius: 25px 25px 0 0 !important; box-shadow: 0 -10px 40px rgba(0,0,0,0.4) !important; 
+                margin: 0 !important; padding: 2em 2em 6em 2em !important; width: 100% !important; max-width: 100% !important;
+                box-sizing: border-box;
+                transform: translateY(150%) !important; opacity: 0 !important; visibility: hidden !important;
+                transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s, visibility 0.4s !important;
+            }
+            .sidebar.active { transform: translateY(0) !important; opacity: 1 !important; visibility: visible !important; }
+
+            .sidebar-overlay { 
+                display: block; position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+                background: rgba(0,0,0,0.6); z-index: 9997; backdrop-filter: blur(3px);
+                opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
+            }
+            .sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+            .toc-toggle-btn {
+                display: flex; align-items: center; justify-content: center;
+                position: fixed; bottom: 20px; right: 20px;
+                background-color: var(--primary-color); color: white !important;
+                border: none; border-radius: 50px;
+                padding: 12px 25px; font-family: inherit; font-weight: bold; font-size: 1em;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 10000;
+                cursor: pointer; transition: transform 0.2s;
+            }
+            .toc-toggle-btn:active { transform: scale(0.95); }
+            
+            .sidebar .progress-container, .sidebar .progress-text { display: none !important; }
+
+            .mobile-progress-container { 
+                display: block; position: fixed; top: 0; left: 0; right: 0; 
+                margin: 0; z-index: 9999; height: 4px; background: rgba(0,0,0,0.05); 
+            }
+            html[data-theme="dark"] .mobile-progress-container { background: rgba(255,255,255,0.05); }
+            .mobile-progress-bar { 
+                height: 100%; width: 0%; 
+                background-color: var(--primary-color); 
+                transition: width 0.15s ease-out; 
+            }
+            
+            .theme-toggle { bottom: 85px; left: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-progress-container">
+        <div class="mobile-progress-bar" id="mobile-progress-bar"></div>
+    </div>
+
+    <!-- مخزن جادویی کد ویرایشگر -->
+    <script type="text/plain" id="raw-editor-html" style="display:none;">${encodeURIComponent(escape(rawEditorHTML))}</script>
+
+    <div class="sidebar-overlay" onclick="toggleMobileToc()"></div>
+    <button class="theme-toggle" id="exportThemeBtn" onclick="toggleExportTheme()" title="تغییر حالت شب/روز">🌙</button>
+    <button class="toc-toggle-btn" onclick="toggleMobileToc()">فهرست</button>
+
+    <div class="export-container">
+        <aside class="sidebar">
+            <div class="toc-title">فهرست</div>
+            <div class="toc-list" id="export-toc">
+                ${tocHTML}
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="export-progress-bar"></div>
+            </div>
+            <div class="progress-text" id="export-progress-text">0% خوانده شده</div>
+        </aside>
+        
+        <main class="main-content">
+            ${contentHTML}
+        </main>
+    </div>
+    
+    <footer>طراحی و اجرا شده توسط کیومرث</footer>
+
+    <script>
+        function toggleExportTheme() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('article-theme', isDark ? 'light' : 'dark');
+            document.getElementById('exportThemeBtn').innerText = isDark ? '🌙' : '☀️';
+        }
+        
+        if (localStorage.getItem('article-theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            const btn = document.getElementById('exportThemeBtn');
+            if(btn) btn.innerText = '☀️';
+        }
+
+        document.addEventListener('scroll', function() {
+            const scrollTop = window.scrollY || document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let percent = scrollHeight > 0 ? Math.min(100, Math.max(0, (scrollTop / scrollHeight) * 100)) : 0;
+            
+            const pb = document.getElementById('export-progress-bar');
+            if(pb) pb.style.width = percent + '%';
+            
+            const mobilePb = document.getElementById('mobile-progress-bar');
+            if(mobilePb) mobilePb.style.width = percent + '%';
+            
+            const pText = document.getElementById('export-progress-text');
+            if(pText) pText.innerText = Math.round(percent) + '% خوانده شده';
+
+            const headings = document.querySelectorAll('.main-content h2, .main-content h3, .main-content h4');
+            const tocLinks = document.querySelectorAll('#export-toc a');
+            
+            let currentActiveId = null;
+            headings.forEach(h => { if (h.offsetTop <= scrollTop + 150) currentActiveId = h.id; });
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (currentActiveId && link.getAttribute('href') === '#' + currentActiveId) link.classList.add('active');
+            });
+        });
+
+        function toggleMobileToc() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if(sidebar) sidebar.classList.toggle('active');
+            if(overlay) overlay.classList.toggle('active');
+        }
+
+        document.querySelectorAll('#export-toc a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const sidebar = document.querySelector('.sidebar');
+                if(sidebar && sidebar.classList.contains('active')) {
+                    toggleMobileToc();
+                }
+                const targetEl = document.getElementById(this.getAttribute('href').substring(1));
+                if(targetEl) window.scrollTo({ top: targetEl.offsetTop - 50, behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
