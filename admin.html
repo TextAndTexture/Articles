@@ -169,6 +169,7 @@
             flex-direction: column;
             position: relative;
             border: 1px solid rgba(0,0,0,0.02);
+            /* تنظیمات حالت پازلی (Masonry) */
             break-inside: avoid;
             page-break-inside: avoid;
             -webkit-column-break-inside: avoid;
@@ -191,6 +192,7 @@
             align-items: center;
         }
 
+        /* گرادیانت پشت تاریخ و نویسنده */
         .card-img::after {
             content: '';
             position: absolute;
@@ -352,13 +354,14 @@
     <!-- صفحه بارگذاری همگام‌سازی -->
     <div id="sync-overlay" style="display: none;">
         <div class="spinner"></div>
-        <h2 id="sync-text" style="font-weight: 700; margin:0;">در حال همگام‌سازی خودکار با سرور...</h2>
+        <h2 id="sync-text" style="font-weight: 700; margin:0;">در حال دریافت اطلاعات مقاله از سرور...</h2>
         <p style="opacity: 0.7; margin-top: 10px; font-weight: 300;">لطفا شکیبا باشید</p>
     </div>
 
     <!-- 
       =========== مخزن امن کدهای ویرایشگر =========== 
-      کدهای فایل editor.html خود را دقیقا به جای xxxxx در بین تگ‌های زیر پیست کنید.
+      کدهای فایل ادیتور به صورت کاملاً یکپارچه و ضد-تداخل در اینجا قرار گرفته است.
+      (تمامی let ها به var تبدیل شدند تا از خطای تداخل حافظه جلوگیری شود)
     -->
     <textarea id="editor-template" style="display:none;">&lt;!DOCTYPE html&gt;
 &lt;html lang="fa" dir="rtl"&gt;
@@ -387,13 +390,12 @@
             --spacing-lg: 24px;
         }
 
-        /* پالت رنگی ذغالی (Charcoal Dark) برای محیط ویرایشگر */
         html[data-theme="dark"] {
-            --bg-color: #18181b;       /* ذغالی پس‌زمینه */
-            --surface-color: #27272a;  /* ذغالی پنل‌ها */
-            --primary-color: #60a5fa;  /* آبی روشن */
+            --bg-color: #18181b;       
+            --surface-color: #27272a;  
+            --primary-color: #60a5fa;  
             --primary-hover: #3b82f6;
-            --text-color: #f4f4f5;     /* خاکستری بسیار روشن مایل به سفید */
+            --text-color: #f4f4f5;     
             --text-muted: #a1a1aa;
             --border-color: #3f3f46;
         }
@@ -402,22 +404,16 @@
             font-family: 'Vazirmatn', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            min-height: 100vh;
+            margin: 0; padding: 0; display: flex; min-height: 100vh;
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* باطل کردن بک‌گراندهای سفید و کدهای مخرب در محیط ویرایشگر (هنگام Paste) */
         html[data-theme="dark"] .main-workspace *:not(.custom-highlight):not(.editor-img-caption):not(.html-preview-area):not(.html-editor-textarea) {
             background-color: transparent !important;
             color: var(--text-color) !important;
         }
 
-        .app-layout {
-            display: flex; width: 100%; max-width: 1400px; margin: 0 auto; padding: var(--spacing-md); gap: var(--spacing-lg);
-        }
+        .app-layout { display: flex; width: 100%; max-width: 1400px; margin: 0 auto; padding: var(--spacing-md); gap: var(--spacing-lg); }
 
         .sidebar {
             width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: var(--spacing-md);
@@ -670,13 +666,15 @@
     &lt;/div&gt;
 
     &lt;script&gt;
-        let articleData = {
+        // استفاده از var به جای let برای جلوگیری از خطای Identifier already declared
+        var articleData = {
             title: '', subtitle: '', author: '', intro: '', thumbnail: '', thumbnailLink: '',
             selectedFont: 'Vazirmatn', highlightColor: '#ff8c00',
             customFonts: [], blocks: [] 
         };
 
-        let activeBlockId = null; let draggedBlockId = null;
+        var activeBlockId = null; 
+        var draggedBlockId = null;
 
         function generateId() { return 'block_' + Math.random().toString(36).substr(2, 9); }
 
@@ -686,6 +684,7 @@
             localStorage.setItem('editor-theme', isDark ? 'light' : 'dark');
             document.getElementById('appThemeBtn').innerText = isDark ? '🌙' : '☀️';
         }
+        
         if (localStorage.getItem('editor-theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
@@ -693,6 +692,10 @@
         window.onload = () =&gt; {
             const themeBtn = document.getElementById('appThemeBtn');
             if (themeBtn &amp;&amp; document.documentElement.getAttribute('data-theme') === 'dark') themeBtn.innerText = '☀️';
+
+            // سیستم ضد-قفل: همیشه دکمه انتشار رو در حالت اولیه قرار میده
+            const pubBtn = document.getElementById('publishBtn');
+            if (pubBtn) { pubBtn.innerText = '🚀 انتشار در سایت'; pubBtn.disabled = false; }
 
             if (window.INJECTED_ARTICLE_DATA) {
                 articleData = window.INJECTED_ARTICLE_DATA;
@@ -1012,9 +1015,16 @@
                         if (block.isolateHtml) {
                             const shadowHost = document.createElement('div'); shadowHost.style.width = block.htmlWidth || '100%'; shadowHost.style.margin = '0 auto'; shadowHost.style.overflowX = 'auto'; shadowHost.style.textAlign = 'initial';
                             const shadowRoot = shadowHost.attachShadow({mode: 'open'});
-                            let fontCss = ''; if (block.useAppFont) fontCss = `&lt;style&gt;:host { font-family: '${articleData.selectedFont}', sans-serif !important; } * { font-family: inherit; }&lt;` + `/style&gt;`;
-                            shadowRoot.innerHTML = fontCss; shadowRoot.appendChild(contentWrapper); previewArea.appendChild(shadowHost);
-                        } else { previewArea.appendChild(contentWrapper); }
+                            let fontCss = ''; if (block.useAppFont) fontCss = `&lt;style&gt;:host { font-family: '${articleData.selectedFont}', sans-serif !important; } * { font-family: inherit; }&lt;\/style&gt;`;
+                            const escapedContent = innerHtmlContent.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
+                            contentHTML += `&lt;div class="custom-html-wrapper" style="text-align:${block.align || 'center'};"&gt;
+                                &lt;div id="shadow-host-${block.id}" style="width:${block.htmlWidth || '100%'}; margin:0 auto; overflow-x:auto; text-align:initial;"&gt;&lt;/div&gt;
+                                &lt;script&gt;(function(){const host=document.getElementById('shadow-host-${block.id}');const shadow=host.attachShadow({mode:'open'});const fragment=document.createRange().createContextualFragment(\`${fontCss}\`+\`${escapedContent}\`);shadow.appendChild(fragment);})();&lt;\/script&gt;
+                            &lt;/div&gt;`;
+                        } else {
+                            const fontClass = block.useAppFont ? ' force-app-font' : '';
+                            contentHTML += `&lt;div class="custom-html-wrapper${fontClass}" style="text-align:${block.align || 'center'}; overflow-x: auto;"&gt;${innerHtmlContent}&lt;/div&gt;`;
+                        }
                     } else { previewArea.innerHTML = '&lt;span style="color:var(--text-muted)"&gt;بدون کد...&lt;/span&gt;'; }
 
                     contentDiv.appendChild(headerHTML); contentDiv.appendChild(txtArea); contentDiv.appendChild(previewArea);
@@ -1172,11 +1182,11 @@
                     } else if (block.type === 'html' &amp;&amp; (block.content &amp;&amp; block.content.trim() !== '' || block.editablePreview)) {
                         const innerHtmlContent = block.editablePreview ? `&lt;div contenteditable="true" style="outline:1px dashed #ccc; padding:10px; min-height:40px;"&gt;${block.content}&lt;/div&gt;` : block.content;
                         if (block.isolateHtml) {
-                            let fontCss = ''; if (block.useAppFont) fontCss = `&lt;style&gt;:host { font-family: '${articleData.selectedFont}', sans-serif !important; } * { font-family: inherit; }&lt;` + `/style&gt;`;
+                            let fontCss = ''; if (block.useAppFont) fontCss = `&lt;style&gt;:host { font-family: '${articleData.selectedFont}', sans-serif !important; } * { font-family: inherit; }&lt;\/style&gt;`;
                             const escapedContent = innerHtmlContent.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$').replace(/&lt;\//g, '&lt;\\/');
                             contentHTML += `&lt;div class="custom-html-wrapper" style="text-align:${block.align || 'center'};"&gt;
                                 &lt;div id="shadow-host-${block.id}" style="width:${block.htmlWidth || '100%'}; margin:0 auto; overflow-x:auto; text-align:initial;"&gt;&lt;/div&gt;
-                                &lt;script&gt;(function(){const host=document.getElementById('shadow-host-${block.id}');const shadow=host.attachShadow({mode:'open'});const fragment=document.createRange().createContextualFragment(\`${fontCss}\`+\`${escapedContent}\`);shadow.appendChild(fragment);})();&lt;` + `/script&gt;
+                                &lt;script&gt;(function(){const host=document.getElementById('shadow-host-${block.id}');const shadow=host.attachShadow({mode:'open'});const fragment=document.createRange().createContextualFragment(\`${fontCss}\`+\`${escapedContent}\`);shadow.appendChild(fragment);})();&lt;\/script&gt;
                             &lt;/div&gt;`;
                         } else {
                             const fontClass = block.useAppFont ? ' force-app-font' : '';
@@ -1192,6 +1202,14 @@
 
                 // ساخت کپی ایمن از ادیتور
                 const docClone = document.documentElement.cloneNode(true);
+                
+                // برطرف کردن باگ State Cloning Bug (ریست کردن دکمه‌ها در کلون قبل از ذخیره)
+                const clonePubBtn = docClone.querySelector('#publishBtn');
+                if (clonePubBtn) {
+                    clonePubBtn.innerText = '🚀 انتشار در سایت';
+                    clonePubBtn.disabled = false;
+                }
+
                 const safeEmpty = (sel) =&gt; { const el = docClone.querySelector(sel); if(el) el.innerHTML = ''; };
                 
                 safeEmpty('#live-blocks-container'); safeEmpty('#sidebar-toc'); safeEmpty('#field-title'); safeEmpty('#field-subtitle'); safeEmpty('#field-author'); safeEmpty('#field-intro'); safeEmpty('#custom-fonts-style');
@@ -1201,7 +1219,7 @@
                 
                 let dataScript = docClone.querySelector('#injected-data') || document.createElement('script'); 
                 dataScript.id = 'injected-data'; 
-                // جلوگیری از خطای اسکریپت با اسکیپ کردن
+                // ذخیره دیتا بدون خطای تداخل
                 dataScript.textContent = `window.INJECTED_ARTICLE_DATA = ${JSON.stringify(articleData).replace(/&lt;\//g, '&lt;\\/')};`;
                 if(!docClone.querySelector('#injected-data')) {
                     const head = docClone.querySelector('head');
@@ -1230,7 +1248,7 @@
                 }
             };
         }
-    &lt;` + `/script&gt;
+    &lt;\/script&gt;
 
     &lt;style id="custom-fonts-export"&gt;
         ${vazirCDN}
@@ -1363,7 +1381,7 @@
     &lt;/div&gt;
 
     &lt;!-- مخزن جادویی کد ویرایشگر --&gt;
-    &lt;script type="text/plain" id="raw-editor-html" style="display:none;"&gt;${encodeURIComponent(escape(rawEditorHTML))}&lt;` + `/script&gt;
+    &lt;script type="text/plain" id="raw-editor-html" style="display:none;"&gt;\${encodeURIComponent(escape(rawEditorHTML))}&lt;\/script&gt;
 
     &lt;div class="sidebar-overlay" onclick="toggleMobileToc()"&gt;&lt;/div&gt;
     &lt;button class="theme-toggle" id="exportThemeBtn" onclick="toggleExportTheme()" title="تغییر حالت شب/روز"&gt;🌙&lt;/button&gt;
@@ -1373,7 +1391,7 @@
         &lt;aside class="sidebar"&gt;
             &lt;div class="toc-title"&gt;فهرست&lt;/div&gt;
             &lt;div class="toc-list" id="export-toc"&gt;
-                ${tocHTML}
+                \${tocHTML}
             &lt;/div&gt;
             &lt;div class="progress-container"&gt;
                 &lt;div class="progress-bar" id="export-progress-bar"&gt;&lt;/div&gt;
@@ -1382,7 +1400,7 @@
         &lt;/aside&gt;
         
         &lt;main class="main-content"&gt;
-            ${contentHTML}
+            \${contentHTML}
         &lt;/main&gt;
     &lt;/div&gt;
     
@@ -1445,7 +1463,7 @@
                 if(targetEl) window.scrollTo({ top: targetEl.offsetTop - 50, behavior: 'smooth' });
             });
         });
-    &lt;` + `/script&gt;
+    &lt;\/script&gt;
 &lt;/body&gt;
 &lt;/html&gt;`;
 
@@ -1489,7 +1507,7 @@
     &lt;/script&gt;
 &lt;/body&gt;
 &lt;/html&gt;
-    </textarea>
+</textarea>
     <!-- ======================================= -->
 
     <script id="app-data" type="application/json">{
@@ -1502,6 +1520,15 @@
         "customFontBase64": ""
     },
     "articles": [
+        {
+            "id": "art-1775079174450",
+            "title": "تست مقاله",
+            "desc": "بدون توضیحات",
+            "link": "article_1775079190096.html",
+            "image": "",
+            "author": "نویسنده ناشناس",
+            "date": "۱۴۰۵/۱/۱۳"
+        },
         {
             "id": "art-1775075992848",
             "title": "بهار دلنشین",
@@ -1524,7 +1551,7 @@
 }</script>
 
     <!-- پنجره ادیتور (مخفی در حالت عادی) -->
-    <div id="editor-modal" class="active">
+    <div id="editor-modal" class="">
         <div id="editor-modal-header">
             <h3 style="margin: 0; color: var(--text-main);">✍️ در حال نوشتن مقاله...</h3>
             <button class="btn-action btn-outline" style="width: auto; margin:0; padding: 8px 20px;" onclick="closeEditorModal()">بستن و انصراف ✖</button>
@@ -1598,33 +1625,48 @@
 
     <script>
         // ==========================================
-        // تنظیمات API و گیت‌هاب (نسخه امن بدون هاردکد توکن)
+        // تنظیمات API و گیت‌هاب
         // ==========================================
         const REPO_OWNER = 'textandtexture'; 
         const REPO_NAME = 'Articles'; 
-        const BRANCH = 'main'; // اگر با خطای 404 مواجه شدید، این مقدار را به 'master' تغییر دهید
+        const BRANCH = 'main'; 
         
         let GITHUB_TOKEN = localStorage.getItem('my_gh_token');
 
-        if (!GITHUB_TOKEN) {
-            GITHUB_TOKEN = prompt('لطفاً توکن گیت‌هاب (Personal Access Token) خود را وارد کنید:\n(این توکن به صورت امن فقط در مرورگر سیستم شما ذخیره می‌شود و در کدهای سایت قرار نمی‌گیرد)');
-            if (GITHUB_TOKEN) {
-                localStorage.setItem('my_gh_token', GITHUB_TOKEN.trim());
-            } else {
-                alert('هشدار: بدون توکن گیت‌هاب ارتباط با سرور قطع خواهد بود!');
-            }
-        }
+        // چک در زمان لود صفحه (استفاده از رویداد onload برای اجرای بهتر)
+        window.onload = () => {
+            // جلوگیری از قفل ماندن دکمه‌های پنل اصلی در زمان لود مجدد
+            const btnSave = document.getElementById('btn-save-admin');
+            if (btnSave) { btnSave.innerText = '☁️ ذخیره پنل در سرور (آنلاین)'; btnSave.disabled = false; }
+            
+            const btnPub = document.getElementById('btn-publish-index');
+            if (btnPub) { btnPub.innerText = '🚀 انتشار مستقیم ایندکس'; btnPub.disabled = false; }
 
-        // تابع جدید برای آپدیت دستی توکن
+            if (!GITHUB_TOKEN) {
+                GITHUB_TOKEN = prompt('لطفاً توکن گیت‌هاب (Personal Access Token) خود را وارد کنید:\n(این توکن به صورت امن فقط در مرورگر سیستم شما ذخیره می‌شود)');
+                if (GITHUB_TOKEN) {
+                    localStorage.setItem('my_gh_token', GITHUB_TOKEN.trim());
+                } else {
+                    alert('هشدار: بدون توکن گیت‌هاب ارتباط با سرور قطع خواهد بود!');
+                }
+            }
+
+            initData();
+            if (GITHUB_TOKEN) {
+                fetchLatestDataFromServer(true);
+            }
+        };
+
+        // تابع آپدیت دستی توکن
         function updateGitHubTokenUI() {
             const currentToken = localStorage.getItem('my_gh_token') || '';
-            const newToken = prompt('لطفاً توکن گیت‌هاب جدید خود را وارد کنید:\n(برای حذف توکن فعلی، این کادر را خالی بگذارید و تایید کنید)', currentToken);
+            const newToken = prompt('لطفاً توکن گیت‌هاب جدید خود را وارد کنید:\n(برای حذف توکن فعلی، کادر را خالی بگذارید)', currentToken);
             
-            if (newToken !== null) { // اگر کاربر Cancel نکرده باشد
+            if (newToken !== null) { 
                 if (newToken.trim() === '') {
                     localStorage.removeItem('my_gh_token');
                     GITHUB_TOKEN = null;
-                    alert('توکن شما از حافظه مرورگر پاک شد.');
+                    alert('توکن از حافظه پاک شد.');
                 } else {
                     localStorage.setItem('my_gh_token', newToken.trim());
                     GITHUB_TOKEN = newToken.trim();
@@ -1636,7 +1678,7 @@
 
         let projectData = {};
 
-        // --- جلوگیری از کپی شدن استایل‌های مخرب (فقط متن خام پیست می‌شود) ---
+        // --- جلوگیری از کپی شدن استایل‌های مخرب ---
         document.addEventListener('paste', function(e) {
             if (e.target.getAttribute('contenteditable') === 'true' || e.target.isContentEditable) {
                 e.preventDefault(); 
@@ -1681,7 +1723,6 @@
         function updateState(key, value, element = null) {
             const faValue = toFaDigit(value); 
             projectData.settings[key] = faValue;
-            
             if(key === 'siteName') document.title = faValue;
 
             if (element) {
@@ -1715,10 +1756,8 @@
 
             projectData.articles.forEach((art, index) => {
                 const bgStyle = art.image ? `background-image: url('${art.image}');` : '';
-                
                 const isFirst = index === 0;
                 const isLast = index === projectData.articles.length - 1;
-                
                 const author = art.author || "نویسنده ناشناس";
                 const date = art.date || toFaDigit(new Date().toLocaleDateString('fa-IR'));
 
@@ -1775,7 +1814,6 @@
             const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/admin.html?ref=${BRANCH}`;
             
             try {
-                // اضافه کردن تایم‌استمپ برای دور زدن کش مرورگر بدون ایجاد مشکل CORS
                 const response = await fetch(url + '&t=' + Date.now(), {
                     headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
                 });
@@ -1828,7 +1866,7 @@
                 if (!putRes.ok) throw new Error((await putRes.json()).message);
                 return true;
             } catch (error) {
-                console.error(error); alert('خطا در گیت‌هاب: ' + error.message); return false;
+                console.error(error); throw error; 
             }
         }
 
@@ -1848,7 +1886,7 @@
         }
 
         // ==========================================
-        // سیستم ویرایشگر داخلی (Iframe)
+        // سیستم ویرایشگر داخلی (Iframe) با استخراج خام
         // ==========================================
 
         function addNewDraftArticle() {
@@ -1856,7 +1894,7 @@
                 id: 'art-' + Date.now(),
                 title: 'عنوان مقاله جدید',
                 desc: 'توضیحات کوتاه مقاله را اینجا بنویسید...',
-                link: '#', // لینک در هنگام انتشار ساخته میشود
+                link: '#', 
                 image: '',
                 author: 'نام نویسنده',
                 date: toFaDigit(new Date().toLocaleDateString('fa-IR'))
@@ -1877,37 +1915,64 @@
             const templateEl = document.getElementById('editor-template');
             const fallbackTemplate = templateEl.value ? templateEl.value.trim() : templateEl.textContent.trim();
             
+            // نمایش صفحه لودینگ در پنل
+            const overlay = document.getElementById('sync-overlay');
+            const syncText = document.getElementById('sync-text');
+            overlay.style.display = 'flex';
+            syncText.innerText = 'در حال دریافت اطلاعات مقاله از سرور...';
+
             if (art.link && art.link.endsWith('.html') && !art.link.startsWith('http')) {
                 try {
                     const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${art.link}?ref=${BRANCH}`;
                     const res = await fetch(url + '&t=' + Date.now(), { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } });
+                    
                     if (res.ok) {
                         const data = await res.json();
                         const base64Clean = data.content.replace(/\n/g, '');
-                        htmlContent = decodeURIComponent(escape(atob(base64Clean)));
+                        const publishedHTML = decodeURIComponent(escape(atob(base64Clean)));
+                        
+                        const parser = new DOMParser();
+                        const docParsed = parser.parseFromString(publishedHTML, 'text/html');
+                        const rawDataNode = docParsed.getElementById('raw-editor-html');
+                        
+                        if (rawDataNode) {
+                            htmlContent = unescape(decodeURIComponent(rawDataNode.textContent));
+                        } else {
+                            alert('⚠️ توجه: این مقاله با نسخه قدیمی ایجاد شده و امکان ویرایش زنده ندارد.');
+                            htmlContent = fallbackTemplate;
+                        }
                     } else {
                         htmlContent = fallbackTemplate;
                     }
                 } catch (e) {
+                    console.error("Error loading article:", e);
                     htmlContent = fallbackTemplate;
                 }
             } else {
                 htmlContent = fallbackTemplate;
             }
 
-            if (htmlContent === 'xxxxx' || !htmlContent) {
-                alert('لطفا کدهای ادیتور را به جای xxxxx قرار دهید تا امکان نوشتن مقاله فراهم شود.');
+            overlay.style.display = 'none';
+
+            if (htmlContent === 'xxxxx' || !htmlContent || htmlContent.length < 50) {
+                alert('خطا در بارگذاری ادیتور: کد مرجع یافت نشد!');
                 return;
             }
 
             const injectedScript = `<script>window.PARENT_ARTICLE_ID = '${id}';<\/script>`;
-            htmlContent = htmlContent.replace('<head>', '<head>' + injectedScript);
+            htmlContent = htmlContent.replace(/<head[^>]*>/i, '$&' + injectedScript);
 
             const modal = document.getElementById('editor-modal');
-            const iframe = document.getElementById('editor-iframe');
+            
+            // بازسازی کامل تگ Iframe برای جلوگیری از خطای Identifier already been declared
+            const oldIframe = document.getElementById('editor-iframe');
+            const newIframe = document.createElement('iframe');
+            newIframe.id = 'editor-iframe';
+            oldIframe.parentNode.replaceChild(newIframe, oldIframe);
+
             modal.classList.add('active');
             
-            const doc = iframe.contentWindow.document;
+            const doc = newIframe.contentWindow.document;
             doc.open();
             doc.write(htmlContent);
             doc.close();
@@ -1930,15 +1995,19 @@
 
                 const fileName = (art.link && art.link !== '#') ? art.link : `article_${Date.now()}.html`;
                 
-                const successArt = await uploadToGitHub(htmlContent, fileName, `Publish article: ${fileName}`);
-                
-                if (successArt) {
-                    art.link = fileName;
-                    await publishIndexHTML(true);
-                    await saveAdminPanelToGitHub(true);
+                try {
+                    const successArt = await uploadToGitHub(htmlContent, fileName, `Publish article: ${fileName}`);
+                    
+                    if (successArt) {
+                        art.link = fileName;
+                        await publishIndexHTML(true);
+                        await saveAdminPanelToGitHub(true);
 
-                    alert('✅ مقاله منتشر شد، کارت‌ها به‌روزرسانی شدند و پنل در سرور ذخیره شد!');
-                    closeEditorModal();
+                        alert('✅ مقاله منتشر شد، کارت‌ها به‌روزرسانی شدند و پنل در سرور ذخیره شد!');
+                        closeEditorModal();
+                    }
+                } catch(error) {
+                    alert('❌ خطا در عملیات انتشار: ' + error.message);
                 }
             }
         });
@@ -2142,14 +2211,34 @@
             const dynStyle = clonedDoc.getElementById('dynamic-custom-font');
             if(dynStyle) dynStyle.remove();
 
+            // ریست کردن وضعیت دکمه‌ها در کلون (جلوگیری از قفل شدن همیشگی)
+            const cloneBtnSave = clonedDoc.getElementById('btn-save-admin');
+            if (cloneBtnSave) { cloneBtnSave.innerText = '☁️ ذخیره پنل در سرور (آنلاین)'; cloneBtnSave.disabled = false; }
+            
+            const cloneBtnPub = clonedDoc.getElementById('btn-publish-index');
+            if (cloneBtnPub) { cloneBtnPub.innerText = '🚀 انتشار مستقیم ایندکس'; cloneBtnPub.disabled = false; }
+
+            const cloneModal = clonedDoc.getElementById('editor-modal');
+            if (cloneModal) { cloneModal.classList.remove('active'); }
+            
+            const cloneOverlay = clonedDoc.getElementById('sync-overlay');
+            if (cloneOverlay) { cloneOverlay.style.display = 'none'; }
+
             const htmlContent = "<!DOCTYPE html>\n" + clonedDoc.documentElement.outerHTML;
             
-            const success = await uploadToGitHub(htmlContent, 'admin.html', 'Update Admin Panel state');
-            
-            if (!isSilent) {
-                btn.innerText = originalText;
-                btn.disabled = false;
-                if (success) alert('✅ پنل مدیریت با موفقیت در سرور ذخیره شد!');
+            try {
+                const success = await uploadToGitHub(htmlContent, 'admin.html', 'Update Admin Panel state');
+                if (!isSilent) {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    if (success) alert('✅ پنل مدیریت با موفقیت در سرور ذخیره شد!');
+                }
+            } catch (e) {
+                if (!isSilent) {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    alert('خطا در ذخیره پنل: ' + e.message);
+                }
             }
         }
 
@@ -2267,22 +2356,21 @@
                 btn.disabled = true;
             }
 
-            const success = await uploadToGitHub(cleanHTML, 'index.html', 'Update index page');
-
-            if (!isSilent) {
-                btn.innerText = originalText;
-                btn.disabled = false;
-                if (success) alert('✅ صفحه اصلی وب‌سایت (index.html) با موفقیت به‌روزرسانی شد!');
+            try {
+                const success = await uploadToGitHub(cleanHTML, 'index.html', 'Update index page');
+                if (!isSilent) {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    if (success) alert('✅ صفحه اصلی وب‌سایت (index.html) با موفقیت به‌روزرسانی شد!');
+                }
+            } catch (e) {
+                if (!isSilent) {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    alert('خطا در انتشار ایندکس: ' + e.message);
+                }
             }
         }
-
-        window.onload = () => {
-            initData();
-            // بعد از لود اولیه، سیستم به صورت خودکار تغییرات جدید سرور را می‌گیرد
-            if (GITHUB_TOKEN) {
-                fetchLatestDataFromServer(true);
-            }
-        };
     </script>
 
 </body></html>
