@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>وبلاگ حرفه‌ای من</title>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
+        :root { --primary: #111827; --bg: #f9fafb; --surface: #ffffff; --text: #111827; --muted: #6b7280; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Vazirmatn', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        header {
+            position: relative; padding: 12vh 5vw 8vh; text-align: center;
+            background-color: var(--surface); border-bottom: 1px solid #e5e7eb;
+            border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); margin-bottom: 5vh;
+            
+        }
+        
+        
+        
+        header > div { position: relative; z-index: 2; max-width: 800px; margin: 0 auto; }
+        header h1 { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900; letter-spacing: -1px; margin-bottom: 2vh; line-height: 1.2;}
+        header p { font-size: clamp(1.1rem, 1.5vw, 1.3rem); opacity: 0.9; line-height: 1.8; font-weight: 300;}
+        
+        main { flex: 1; padding: 0 5vw 8vh; max-width: 1400px; width: 100%; margin: 0 auto; }
+        .grid { column-width: 320px; column-gap: 2.5vw; }
+        
+        .card { background: var(--surface); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); display: flex; flex-direction: column; transition: transform 0.4s, box-shadow 0.4s; border: 1px solid rgba(0,0,0,0.02); break-inside: avoid; page-break-inside: avoid; -webkit-column-break-inside: avoid; margin-bottom: 2.5vw; width: 100%; }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.12); }
+        
+        .card-img { height: 220px; background-size: cover; background-position: center; position: relative; display: flex; flex-direction: column; justify-content: flex-end; }
+        .card-img::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 60%; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%); z-index: 1; }
+        .card-meta { position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; color: white; font-size: 0.85rem; }
+        .meta-author { font-weight: bold; }
+        .meta-date { font-weight: 300; opacity: 0.9; }
+
+        .card-content { padding: 3vh 2vw; display: flex; flex-direction: column; flex: 1; }
+        .card-title { font-size: 1.4rem; margin-bottom: 1.5vh; color: var(--text); font-weight: 800; line-height:1.4;}
+        .card-desc { color: var(--muted); margin-bottom: 3vh; flex: 1; font-size: 1rem; line-height: 1.7; font-weight:300; text-align: justify;}
+        .card-actions { padding: 0 2vw 3vh; }
+        
+        .read-more { display: block; background-color: var(--primary); color: white; text-decoration: none; padding: 1.5vh; border-radius: 12px; text-align: center; font-weight: 600; transition: transform 0.3s; font-size: 0.95rem;}
+        .read-more:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        
+        footer { text-align: center; padding: 4vh 2vw; color: var(--muted); font-size: 0.9rem; font-weight: 300; }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <h1>مجموعه مقالات</h1>
+            <p>برای ویرایش روی متن کلیک کنید. یک طراحی مینیمال برای ارائه بهتر محتوای شما.</p>
+        </div>
+    </header>
+    <main>
+        <div class="grid">
+            
+                        <article class="card">
+                            <div class="card-img" style="background-color: #f3f4f6;">
+                                <div class="card-meta">
+                                    <div class="meta-author">نویسنده ناشناس</div>
+                                    <div class="meta-date">۱۴۰۵/۱/۱۳</div>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <h3 class="card-title">مقاله تست</h3>
+                                <p class="card-desc">بدون توضیحات</p>
+                            </div>
+                            <div class="card-actions">
+                                <a href="article_1775084564701.html" class="read-more">مطالعه مقاله</a>
+                            </div>
+                        </article>
+                    
+        </div>
+    </main>
+    <footer>طراحی شده توسط کیومرث</footer>
+</body>
+</html>
