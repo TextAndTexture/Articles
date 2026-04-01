@@ -489,7 +489,7 @@
                         if (block.isolateHtml) {
                             var fontCss = ''; if (block.useAppFont) fontCss = '&lt;style&gt;:host { font-family: \''+articleData.selectedFont+'\', sans-serif !important; } * { font-family: inherit; }&lt;\\/style&gt;';
                             var escapedContent = innerHtmlContent.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$').replace(/&lt;\//g, '&lt;\\/');
-                            contentHTML += '&lt;div class="custom-html-wrapper" style="text-align:'+(block.align || 'center')+'"&gt;&lt;div id="shadow-host-'+block.id+'" style="width:'+(block.htmlWidth || '100%')+'; margin:0 auto; overflow-x:auto; text-align:initial;"&gt;&lt;/div&gt;&lt;script&gt;(function(){const host=document.getElementById(\'shadow-host-'+block.id+'\');const shadow=host.attachShadow({mode:\'open\'});const fragment=document.createRange().createContextualFragment(\`'+fontCss+'\`+\`'+escapedContent+'\`);shadow.appendChild(fragment);})();&lt;\\/script&gt;&lt;/div&gt;';
+                            contentHTML += '&lt;div class="custom-html-wrapper" style="text-align:'+(block.align || 'center')+'"&gt;&lt;div id="shadow-host-'+block.id+'" style="width:'+(block.htmlWidth || '100%')+'; margin:0 auto; overflow-x:auto; text-align:initial;"&gt;&lt;/div&gt;&lt;script&gt;(function(){const host=document.getElementById(\'shadow-host-'+block.id+'\');const shadow=host.attachShadow({mode:\'open\'});const fragment=document.createRange().createContextualFragment(\`'+fontCss+'\`+\`'+escapedContent+'\`);shadow.appendChild(fragment);})();&lt;/' + 'script&gt;&lt;/div&gt;';
                         } else {
                             var fontClass = block.useAppFont ? ' force-app-font' : '';
                             contentHTML += '&lt;div class="custom-html-wrapper'+fontClass+'" style="text-align:'+(block.align || 'center')+'; overflow-x: auto;"&gt;'+innerHtmlContent+'&lt;/div&gt;';
@@ -513,10 +513,11 @@
                 
                 var dataScript = docClone.querySelector('#injected-data') || document.createElement('script'); 
                 dataScript.id = 'injected-data'; 
-                dataScript.textContent = 'window.INJECTED_ARTICLE_DATA = ' + JSON.stringify(articleData).replace(/&lt;\//g, '&lt;\\/') + ';';
+                dataScript.textContent = 'window.INJECTED_ARTICLE_DATA = ' + JSON.stringify(articleData).replace(/&lt;/g, '\\u003c') + ';';
                 if(!docClone.querySelector('#injected-data')) { var head = docClone.querySelector('head'); if(head) head.appendChild(dataScript); }
                 
                 var rawEditorHTML = '&lt;!DOCTYPE html&gt;\n&lt;html lang="fa" dir="rtl"&gt;\n' + docClone.innerHTML + '\n&lt;/html&gt;';
+                var base64Editor = btoa(unescape(encodeURIComponent(rawEditorHTML)));
 
                 var finalHTML = '&lt;!DOCTYPE html&gt;\n&lt;html lang="fa" dir="rtl"&gt;\n&lt;head&gt;\n' +
                 '    &lt;meta charset="UTF-8"&gt;\n' +
@@ -527,12 +528,16 @@
                 '            window.onload = function() {\n' +
                 '                var rawScript = document.getElementById(\'raw-editor-html\');\n' +
                 '                if (rawScript) {\n' +
-                '                    var editorHtml = unescape(decodeURIComponent(rawScript.textContent));\n' +
+                '                    var content = rawScript.textContent.trim();\n' +
+                '                    var editorHtml = "";\n' +
+                '                    if (content.startsWith("%253C")) editorHtml = unescape(decodeURIComponent(content));\n' +
+                '                    else if (content.startsWith("%3C")) editorHtml = decodeURIComponent(content);\n' +
+                '                    else editorHtml = decodeURIComponent(escape(atob(content)));\n' +
                 '                    document.open(); document.write(editorHtml); document.close();\n' +
                 '                }\n' +
                 '            };\n' +
                 '        }\n' +
-                '    &lt;\\/script&gt;\n' +
+                '    &lt;/' + 'script&gt;\n' +
                 '    &lt;style id="custom-fonts-export"&gt;\n' + vazirCDN + '\n' + customFontsCSS + '\n    &lt;/style&gt;\n' +
                 '    &lt;style&gt;\n' +
                 '        :root { --bg-color: #fdfdfd; --text-color: #2b2b2b; --primary-color: #0056b3; --border-color: #e0e4e8; --sidebar-bg: #f8f9fa; --intro-bg: #f4f6f9; }\n' +
@@ -596,7 +601,7 @@
                 '&lt;/head&gt;\n' +
                 '&lt;body&gt;\n' +
                 '    &lt;div class="mobile-progress-container"&gt;&lt;div class="mobile-progress-bar" id="mobile-progress-bar"&gt;&lt;/div&gt;&lt;/div&gt;\n' +
-                '    &lt;script type="text/plain" id="raw-editor-html" style="display:none;"&gt;' + encodeURIComponent(escape(rawEditorHTML)) + '&lt;\\/script&gt;\n' +
+                '    &lt;script type="text/plain" id="raw-editor-html" style="display:none;"&gt;' + base64Editor + '&lt;/' + 'script&gt;\n' +
                 '    &lt;div class="sidebar-overlay" onclick="toggleMobileToc()"&gt;&lt;/div&gt;\n' +
                 '    &lt;button class="theme-toggle" id="exportThemeBtn" onclick="toggleExportTheme()" title="تغییر حالت شب/روز"&gt;🌙&lt;/button&gt;\n' +
                 '    &lt;button class="toc-toggle-btn" onclick="toggleMobileToc()"&gt;فهرست&lt;/button&gt;\n' +
@@ -618,7 +623,7 @@
                 '        document.addEventListener(\'scroll\', function() { var scrollTop = window.scrollY || document.documentElement.scrollTop; var scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight; var percent = scrollHeight &gt; 0 ? Math.min(100, Math.max(0, (scrollTop / scrollHeight) * 100)) : 0; var pb = document.getElementById(\'export-progress-bar\'); if(pb) pb.style.width = percent + \'%\'; var mobilePb = document.getElementById(\'mobile-progress-bar\'); if(mobilePb) mobilePb.style.width = percent + \'%\'; var pText = document.getElementById(\'export-progress-text\'); if(pText) pText.innerText = Math.round(percent) + \'% خوانده شده\'; var headings = document.querySelectorAll(\'.main-content h2, .main-content h3, .main-content h4\'); var tocLinks = document.querySelectorAll(\'#export-toc a\'); var currentActiveId = null; headings.forEach(function(h) { if (h.offsetTop &lt;= scrollTop + 150) currentActiveId = h.id; }); tocLinks.forEach(function(link) { link.classList.remove(\'active\'); if (currentActiveId &amp;&amp; link.getAttribute(\'href\') === \'#\' + currentActiveId) link.classList.add(\'active\'); }); });\n' +
                 '        function toggleMobileToc() { var sidebar = document.querySelector(\'.sidebar\'); var overlay = document.querySelector(\'.sidebar-overlay\'); if(sidebar) sidebar.classList.toggle(\'active\'); if(overlay) overlay.classList.toggle(\'active\'); }\n' +
                 '        document.querySelectorAll(\'#export-toc a\').forEach(function(anchor) { anchor.addEventListener(\'click\', function (e) { e.preventDefault(); var sidebar = document.querySelector(\'.sidebar\'); if(sidebar &amp;&amp; sidebar.classList.contains(\'active\')) { toggleMobileToc(); } var targetEl = document.getElementById(this.getAttribute(\'href\').substring(1)); if(targetEl) window.scrollTo({ top: targetEl.offsetTop - 50, behavior: \'smooth\' }); }); });\n' +
-                '    &lt;\\/script&gt;\n' +
+                '    &lt;/' + 'script&gt;\n' +
                 '&lt;/body&gt;\n' +
                 '&lt;/html&gt;';
 
@@ -943,12 +948,16 @@
 
             const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/admin.html?ref=${BRANCH}`;
             try {
-                const response = await fetch(url + '&t=' + Date.now(), { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } });
+                // درخواست مستقیم متن خام (بدون درگیری‌های Base64) برای اطمینان 100٪ از لود صحیح فایل‌های حجیم
+                const response = await fetch(url + '&t=' + Date.now(), { 
+                    headers: { 
+                        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3.raw'
+                    } 
+                });
+                
                 if (response.ok) {
-                    const data = await response.json();
-                    const base64Clean = data.content.replace(/\n/g, '');
-                    const htmlContent = decodeURIComponent(escape(atob(base64Clean)));
-
+                    const htmlContent = await response.text();
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(htmlContent, 'text/html');
                     const dataScript = doc.getElementById('app-data');
@@ -1034,46 +1043,66 @@
             const templateEl = document.getElementById('editor-template');
             const fallbackTemplate = templateEl.value ? templateEl.value.trim() : templateEl.textContent.trim();
             
-            showLoading('در حال بارگذاری ویرایشگر...', 'در حال دریافت اطلاعات آخرین نسخه مقاله از سرور');
+            let loadedData = null; // برای اطمینان از بارگیری اطلاعات اولیه روی فرم جدید
 
             if (art.link && art.link.endsWith('.html') && !art.link.startsWith('http') && art.link !== '#') {
+                showLoading('در حال بارگذاری ویرایشگر...', 'در حال دریافت اطلاعات آخرین نسخه مقاله از سرور');
                 try {
                     const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${art.link}?ref=${BRANCH}`;
-                    const res = await fetch(url + '&t=' + Date.now(), { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } });
+                    // دریافت خالص فایل (raw) که خطاهای محدودیت حجم یا Base64 را 100٪ دور می‌زند
+                    const res = await fetch(url + '&t=' + Date.now(), { 
+                        headers: { 
+                            'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                            'Accept': 'application/vnd.github.v3.raw'
+                        } 
+                    });
                     
                     if (res.ok) {
-                        const data = await res.json();
-                        const base64Clean = data.content.replace(/\n/g, '');
-                        const publishedHTML = decodeURIComponent(escape(atob(base64Clean)));
-                        
+                        const publishedHTML = await res.text();
                         const parser = new DOMParser();
                         const docParsed = parser.parseFromString(publishedHTML, 'text/html');
                         const rawDataNode = docParsed.getElementById('raw-editor-html');
                         
                         if (rawDataNode) {
-                            htmlContent = unescape(decodeURIComponent(rawDataNode.textContent));
+                            let content = rawDataNode.textContent.trim();
+                            // پشتیبانی از فایل‌های ذخیره شده قدیمی‌تر و جدید Base64
+                            if (content.startsWith('%253C')) htmlContent = unescape(decodeURIComponent(content));
+                            else if (content.startsWith('%3C')) htmlContent = decodeURIComponent(content);
+                            else htmlContent = decodeURIComponent(escape(atob(content)));
                         } else {
                             htmlContent = fallbackTemplate;
+                            loadedData = art;
                         }
                     } else {
                         htmlContent = fallbackTemplate;
+                        loadedData = art;
                     }
                 } catch (e) {
                     console.error("Error loading article:", e);
                     htmlContent = fallbackTemplate;
+                    loadedData = art;
                 }
+                hideLoading();
             } else {
                 htmlContent = fallbackTemplate;
+                loadedData = art;
             }
-
-            hideLoading();
 
             if (!htmlContent || htmlContent.length < 50 || htmlContent === 'xxxxx') {
                 alert('خطا: کدهای قالب ادیتور یافت نشد!\nلطفاً کدهای ادیتور را به جای xxxxx قرار دهید.');
                 return;
             }
 
-            const injectedScript = `<script>window.PARENT_ARTICLE_ID = '${id}';<\/script>`;
+            // اگر قرار است از Fallback (قالب خام) استفاده شود، داده‌های اولیه (عنوان، نویسنده و...) را از دیتابیس پنل مستقیماً به آن تزریق می‌کنیم تا هرگز خالی باز نشود.
+            let injectedScript = `<script>window.PARENT_ARTICLE_ID = '${id}';<\/script>`;
+            if (loadedData) {
+                const draftData = {
+                    title: loadedData.title || '', subtitle: '', author: loadedData.author || '', intro: loadedData.desc || '',
+                    thumbnail: loadedData.image || '', thumbnailLink: '', selectedFont: 'Vazirmatn', highlightColor: '#ff8c00', customFonts: [], blocks: []
+                };
+                injectedScript += `<script>window.INJECTED_ARTICLE_DATA = ${JSON.stringify(draftData).replace(/</g, '\\u003c')};<\/script>`;
+            }
+
             htmlContent = htmlContent.replace(/<head[^>]*>/i, '$&' + injectedScript);
 
             const modal = document.getElementById('editor-modal');
