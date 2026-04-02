@@ -130,10 +130,10 @@
     <!-- صفحه بارگذاری همگام‌سازی و پروگرس بار -->
     <div id="sync-overlay" style="display: none;">
         <div class="spinner"></div>
-        <h2 id="sync-text" style="font-weight: 700; margin:0;">در حال بارگذاری ویرایشگر...</h2>
-        <p id="sync-subtext" style="opacity: 0.7; margin-top: 10px; font-weight: 300;">در حال دریافت اطلاعات آخرین نسخه مقاله از سرور</p>
+        <h2 id="sync-text" style="font-weight: 700; margin:0;">در حال ذخیره داشبورد...</h2>
+        <p id="sync-subtext" style="opacity: 0.7; margin-top: 10px; font-weight: 300;">در حال ارسال فایل مقاله به سرور گیت‌هاب</p>
         <div class="progress-bar-container">
-            <div id="sync-progress-fill" class="progress-bar-fill" style="width: 100%;"></div>
+            <div id="sync-progress-fill" class="progress-bar-fill" style="width: 90%;"></div>
         </div>
     </div>
 
@@ -147,6 +147,7 @@
     &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
     &lt;title&gt;اپلیکیشن مقاله‌نویس حرفه‌ای (Live)&lt;/title&gt;
     &lt;link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&amp;display=swap" rel="stylesheet"&gt;
+    &lt;script type="application/json" id="saved-article-data"&gt;&lt;/script&gt;
     &lt;style id="custom-fonts-style"&gt;&lt;/style&gt;
     &lt;style&gt;
         :root { --bg-color: #f0f2f5; --surface-color: #ffffff; --primary-color: #0056b3; --primary-hover: #004494; --text-color: #212529; --text-muted: #6c757d; --border-color: #dee2e6; --danger-color: #dc3545; --success-color: #28a745; --warning-color: #ffc107; --highlight-color: #ff8c00; --radius: 8px; --spacing-sm: 8px; --spacing-md: 16px; --spacing-lg: 24px; }
@@ -318,21 +319,32 @@
         function toggleAppTheme() { var isDark = document.documentElement.getAttribute('data-theme') === 'dark'; document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark'); localStorage.setItem('editor-theme', isDark ? 'light' : 'dark'); document.getElementById('appThemeBtn').innerText = isDark ? '🌙' : '☀️'; }
         if (localStorage.getItem('editor-theme') === 'dark') { document.documentElement.setAttribute('data-theme', 'dark'); }
 
-        window.onload = function() {
+        // اجرای فوری بدون تکیه بر onload
+        (function initEditor() {
             var themeBtn = document.getElementById('appThemeBtn'); if (themeBtn &amp;&amp; document.documentElement.getAttribute('data-theme') === 'dark') themeBtn.innerText = '☀️';
             
-            // بررسی داده‌های تزریق شده (چه منتشر شده چه نشده)
-            var isPub = false;
-            if (window.INJECTED_ARTICLE_DATA) {
-                articleData = window.INJECTED_ARTICLE_DATA;
-                // در ورژن جدید، مقدار IsPublished داخل داده ها نیز قابل دستیابی است یا به صورت متغیر سراسری تزریق شده
-                isPub = window.IS_PUBLISHED === true;
-                
-                document.getElementById('field-title').innerHTML = articleData.title || ''; document.getElementById('field-subtitle').innerHTML = articleData.subtitle || ''; document.getElementById('field-author').innerHTML = articleData.author || ''; document.getElementById('field-intro').innerHTML = articleData.intro || '';
-                updateCustomFontsStyle(); updateFontSelector(); changeFont();
-                var picker = document.getElementById('highlight-color-picker'); if(picker) picker.value = articleData.highlightColor || '#ff8c00';
-                changeHighlightColor(); renderThumbnail();
-            } else { changeHighlightColor(); }
+            var isPub = window.IS_PUBLISHED === true;
+            
+            var savedDataNode = document.getElementById('saved-article-data');
+            if (savedDataNode &amp;&amp; savedDataNode.textContent &amp;&amp; savedDataNode.textContent.trim() !== '') {
+                try {
+                    articleData = JSON.parse(savedDataNode.textContent);
+                } catch(e) { console.error('خطا در خواندن دیتای ذخیره شده مقاله:', e); }
+            } else if (window.FALLBACK_ARTICLE_DATA) {
+                articleData = window.FALLBACK_ARTICLE_DATA;
+            }
+
+            document.getElementById('field-title').innerHTML = articleData.title || ''; 
+            document.getElementById('field-subtitle').innerHTML = articleData.subtitle || ''; 
+            document.getElementById('field-author').innerHTML = articleData.author || ''; 
+            document.getElementById('field-intro').innerHTML = articleData.intro || '';
+            
+            updateCustomFontsStyle(); 
+            updateFontSelector(); 
+            changeFont();
+            var picker = document.getElementById('highlight-color-picker'); if(picker) picker.value = articleData.highlightColor || '#ff8c00';
+            changeHighlightColor(); 
+            renderThumbnail();
 
             var pubBtn = document.getElementById('publishBtn'); 
             if (pubBtn) { 
@@ -342,7 +354,7 @@
 
             if(articleData.blocks.length === 0) { addBlock('p', false); }
             renderAllBlocks();
-        };
+        })();
 
         window.addEventListener('message', function(e) {
             if (e.data &amp;&amp; e.data.action === 'PUBLISH_FAILED') { 
@@ -568,13 +580,13 @@
 
                 var docClone = document.documentElement.cloneNode(true);
                 
-                // پاکسازی تزریق‌های محیطی برای جلوگیری از تداخل در دفعات بعدی
+                // پاکسازی تزریق‌های محیطی برای جلوگیری از خطای پارسر
                 var envScripts = docClone.querySelectorAll('.injected-env');
                 envScripts.forEach(function(s) { s.remove(); });
-                // برای پاکسازی کدهای قدیمی که کلاس نداشتند
+                
                 var oldScripts = docClone.querySelectorAll('script');
                 oldScripts.forEach(function(s) {
-                    if (s.textContent.includes("window.PARENT_ARTICLE_ID = '") &amp;&amp; s.textContent.includes("window.IS_PUBLISHED = ")) {
+                    if (s.textContent.includes("window.PARENT_ARTICLE_ID =") &amp;&amp; s.textContent.includes("window.IS_PUBLISHED =")) {
                         s.remove();
                     }
                 });
@@ -585,15 +597,22 @@
                 var safeEmpty = function(sel) { var el = docClone.querySelector(sel); if(el) el.innerHTML = ''; };
                 safeEmpty('#live-blocks-container'); safeEmpty('#sidebar-toc'); safeEmpty('#field-title'); safeEmpty('#field-subtitle'); safeEmpty('#field-author'); safeEmpty('#field-intro'); safeEmpty('#custom-fonts-style');
                 
-                // ریست کاور برای نسخه خام
                 var emptyState = docClone.querySelector('#cover-empty-state'); if(emptyState) emptyState.style.display = 'flex';
                 var prevState = docClone.querySelector('#cover-preview-state'); if(prevState) prevState.style.display = 'none';
                 var thumbImg = docClone.querySelector('#editor-thumbnail-img'); if (thumbImg) { thumbImg.src = ''; }
                 
-                var dataScript = docClone.querySelector('#injected-data') || document.createElement('script'); 
-                dataScript.id = 'injected-data'; 
-                dataScript.textContent = 'window.INJECTED_ARTICLE_DATA = ' + JSON.stringify(articleData).replace(/&lt;/g, '\\u003c') + ';';
-                if(!docClone.querySelector('#injected-data')) { var head = docClone.querySelector('head'); if(head) head.appendChild(dataScript); }
+                // تزریق امن و مطمئن دیتا به فایل
+                var dataNode = docClone.querySelector('#saved-article-data');
+                if (dataNode) {
+                    dataNode.textContent = JSON.stringify(articleData).replace(/&lt;/g, '\\u003c');
+                } else {
+                    var newDataNode = document.createElement('script');
+                    newDataNode.type = 'application/json';
+                    newDataNode.id = 'saved-article-data';
+                    newDataNode.textContent = JSON.stringify(articleData).replace(/&lt;/g, '\\u003c');
+                    var head = docClone.querySelector('head');
+                    if (head) head.appendChild(newDataNode);
+                }
                 
                 var rawEditorHTML = '&lt;!DOCTYPE html&gt;\n&lt;html lang="fa" dir="rtl"&gt;\n' + docClone.innerHTML + '\n&lt;/html&gt;';
                 var base64Editor = btoa(unescape(encodeURIComponent(rawEditorHTML)));
@@ -608,6 +627,7 @@
                 '                var rawScript = document.getElementById(\'raw-editor-html\');\n' +
                 '                if (rawScript) {\n' +
                 '                    var content = rawScript.textContent.trim();\n' +
+                '                    content = content.replace(/\\s/g, "");\n' +
                 '                    var editorHtml = "";\n' +
                 '                    if (content.startsWith("%253C")) editorHtml = unescape(decodeURIComponent(content));\n' +
                 '                    else if (content.startsWith("%3C")) editorHtml = decodeURIComponent(content);\n' +
@@ -652,7 +672,7 @@
                 '        .progress-container { width: 100%; height: 8px; background-color: var(--border-color); border-radius: 4px; margin-top: 1.5em; overflow: hidden;}\n' +
                 '        .progress-bar { height: 100%; background: var(--primary-color); width: 0%; border-radius: 4px; }\n' +
                 '        .progress-text { font-size: 0.8em; opacity: 0.7; margin-top: 0.5em; }\n' +
-                '        .theme-toggle { position: fixed; bottom: 20px; left: 20px; background-color: var(--primary-color); color: white !important; border: none; padding: 0; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2em; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 10000; transition: transform 0.2s;}\n' +
+                '        .theme-toggle { position: fixed; bottom: 20px; left: 20px; background: var(--primary-color); color: white !important; border: none; padding: 0; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2em; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 10000; transition: transform 0.2s;}\n' +
                 '        .theme-toggle:active { transform: scale(0.9); }\n' +
                 '        .toc-toggle-btn { display: none; }\n' +
                 '        .sidebar-overlay { display: none; }\n' +
@@ -706,17 +726,28 @@
                 '&lt;/body&gt;\n' +
                 '&lt;/html&gt;';
 
-                if (window.parent &amp;&amp; window.PARENT_ARTICLE_ID) {
-                    if(btn) { btn.innerText = '⏳ در حال ارسال به پنل...'; }
-                    window.parent.postMessage({ action: 'PUBLISH_FROM_EDITOR', articleId: window.PARENT_ARTICLE_ID, htmlContent: finalHTML, title: articleData.title.replace(/&lt;[^&gt;]*&gt;?/gm, '').trim() || 'بدون عنوان', desc: articleData.intro.replace(/&lt;[^&gt;]*&gt;?/gm, '').trim() || 'بدون توضیحات', author: articleData.author.replace(/&lt;[^&gt;]*&gt;?/gm, '').trim() || 'نویسنده ناشناس', coverImage: articleData.thumbnail || '' }, '*');
-                } else {
-                    alert("توجه: این ویرایشگر به صورت مجزا (آفلاین) اجرا شده است، بنابراین فایل دانلود می‌شود.\nبرای انتشار روی گیت‌هاب، لطفاً ویرایشگر را از طریق فایل ایندکس‌ساز باز کنید.");
+                try {
+                    if (window.parent &amp;&amp; window.PARENT_ARTICLE_ID) {
+                        if(btn) { btn.innerText = '⏳ در حال ارسال به پنل...'; }
+                        window.parent.postMessage({ action: 'PUBLISH_FROM_EDITOR', articleId: window.PARENT_ARTICLE_ID, htmlContent: finalHTML, title: articleData.title.replace(/&lt;[^&gt;]*&gt;?/gm, '').trim() || 'بدون عنوان', desc: articleData.intro.replace(/&lt;[^&gt;]*&gt;?/gm, '').trim() || 'بدون توضیحات', author: articleData.author.replace(/&lt;[^&gt;]*&gt;?/gm, '').trim() || 'نویسنده ناشناس', coverImage: articleData.thumbnail || '' }, '*');
+                    } else {
+                        alert("توجه: این ویرایشگر به صورت مجزا (آفلاین) اجرا شده است، بنابراین فایل دانلود می‌شود.\nبرای انتشار روی گیت‌هاب، لطفاً ویرایشگر را از طریق فایل ایندکس‌ساز باز کنید.");
+                        var blob = new Blob([finalHTML], { type: 'text/html;charset=utf-8' });
+                        var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+                        a.download = (articleData.title.replace(/&lt;[^&gt;]*&gt;?/gm, '') || 'article') + '_export.html';
+                        a.click();
+                        if(btn) { btn.innerText = window.IS_PUBLISHED ? '🔄 به‌روزرسانی مقاله' : '🚀 انتشار در سایت'; btn.disabled = false; }
+                    }
+                } catch(secErr) {
+                    // Fallback اگر مرورگر در محیط Local فایل مانع دسترسی window.parent شد
+                    alert("توجه: بدلیل اجرای فایل آفلاین در مرورگر کروم، ارتباط با پنل مسدود شد. فایل مستقیما دانلود میشود.");
                     var blob = new Blob([finalHTML], { type: 'text/html;charset=utf-8' });
                     var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
                     a.download = (articleData.title.replace(/&lt;[^&gt;]*&gt;?/gm, '') || 'article') + '_export.html';
                     a.click();
                     if(btn) { btn.innerText = window.IS_PUBLISHED ? '🔄 به‌روزرسانی مقاله' : '🚀 انتشار در سایت'; btn.disabled = false; }
                 }
+                
             } catch(e) {
                 console.error(e);
                 alert("خطا در هنگام آماده‌سازی خروجی: " + e.message);
@@ -742,24 +773,14 @@
     },
     "articles": [
         {
-            "id": "art-1775137734144",
-            "title": "مطلب جدید",
-            "desc": "مطلب جدید",
-            "link": "article_1775137759407.html",
+            "id": "art-1775142851682",
+            "title": "طلوعی دیگر",
+            "desc": "توضیحات کوتاه مقاله را اینجا بنویسید...",
+            "link": "article_1775142878478.html",
             "image": "",
             "author": "نام نویسنده",
             "date": "۱۴۰۵/۱/۱۳",
             "isVisible": true
-        },
-        {
-            "id": "art-1775115972428",
-            "title": "ایران",
-            "desc": "توضیحات کوتاه مقاله را اینجا بنویسید...",
-            "link": "#",
-            "image": "",
-            "author": "نام نویسنده",
-            "date": "۱۴۰۵/۱/۱۳",
-            "isVisible": false
         },
         {
             "id": "art-1775084645417",
@@ -1069,7 +1090,8 @@
                     headers: { 
                         'Authorization': `Bearer ${GITHUB_TOKEN}`,
                         'Accept': 'application/vnd.github.v3.raw'
-                    } 
+                    },
+                    cache: 'no-store'
                 });
                 
                 if (response.ok) {
@@ -1100,7 +1122,7 @@
             const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${fileName}`;
             try {
                 let sha = null;
-                const getRes = await fetch(url, { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } });
+                const getRes = await fetch(url, { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }, cache: 'no-store' });
                 if (getRes.ok) {
                     const data = await getRes.json();
                     sha = data.sha;
@@ -1122,7 +1144,7 @@
             if (!GITHUB_TOKEN) return;
             const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${fileName}`;
             try {
-                const getRes = await fetch(url, { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } });
+                const getRes = await fetch(url, { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }, cache: 'no-store' });
                 if (!getRes.ok) return; 
                 const sha = (await getRes.json()).sha;
                 await fetch(url, {
@@ -1172,7 +1194,8 @@
                         headers: { 
                             'Authorization': `Bearer ${GITHUB_TOKEN}`,
                             'Accept': 'application/vnd.github.v3.raw'
-                        } 
+                        },
+                        cache: 'no-store'
                     });
                     
                     if (res.ok) {
@@ -1183,22 +1206,37 @@
                         
                         if (rawDataNode) {
                             let content = rawDataNode.textContent.trim();
-                            // پشتیبانی از فایل‌های ذخیره شده قدیمی‌تر و جدید Base64
-                            if (content.startsWith('%253C')) htmlContent = unescape(decodeURIComponent(content));
-                            else if (content.startsWith('%3C')) htmlContent = decodeURIComponent(content);
-                            else htmlContent = decodeURIComponent(escape(atob(content)));
+                            // رفع مشکل وجود فضای خالی در بیس ۶۴ 
+                            content = content.replace(/\s/g, '');
+                            try {
+                                if (content.startsWith('%253C')) htmlContent = unescape(decodeURIComponent(content));
+                                else if (content.startsWith('%3C')) htmlContent = decodeURIComponent(content);
+                                else htmlContent = decodeURIComponent(escape(atob(content)));
+                            } catch(err) {
+                                console.error('خطای بازگشایی کد Base64:', err);
+                                alert('خطا: کدهای ذخیره شده در سرور دچار خرابی شده‌اند!');
+                                hideLoading();
+                                return;
+                            }
                         } else {
-                            htmlContent = fallbackTemplate;
-                            loadedData = art;
+                            alert('خطا: فایل مقاله در سرور فاقد داده‌های ساختاری ویرایشگر است! (احتمالاً فایل صدمه دیده است)');
+                            hideLoading();
+                            return;
                         }
                     } else {
-                        htmlContent = fallbackTemplate;
-                        loadedData = art;
+                        if (res.status === 404) {
+                            alert('خطا: فایل مقاله هنوز در سرور گیت‌هاب ایجاد/پراکسس نشده است. لطفاً چند ثانیه دیگر دوباره امتحان کنید.');
+                        } else {
+                            alert(`خطای سرور (${res.status}): امکان بارگذاری مقاله وجود ندارد.`);
+                        }
+                        hideLoading();
+                        return; // جلوگیری از باز شدن قالب خالی!
                     }
                 } catch (e) {
                     console.error("Error loading article:", e);
-                    htmlContent = fallbackTemplate;
-                    loadedData = art;
+                    alert('خطا در ارتباط و بارگذاری مقاله از سرور!');
+                    hideLoading();
+                    return;
                 }
                 hideLoading();
             } else {
@@ -1211,22 +1249,27 @@
                 return;
             }
             
-            // پاکسازی اسکریپت‌های تزریق شده در نسخه‌های قبلی تا متغیرهای محیطی با هم تداخل نکنند
-            htmlContent = htmlContent.replace(/<script class="injected-env">.*?<\/script>/gi, '');
+            // پاکسازی اسکریپت‌های تزریق شده قبلی (مخفی کردن از پارسر با شکستن تگ)
+            htmlContent = htmlContent.replace(new RegExp('<script class="injected-env">[\\s\\S]*?</' + 'script>', 'gi'), '');
 
-            // تزریق متغیرهای سیستمی
-            let injectedScript = `<script class="injected-env">window.PARENT_ARTICLE_ID = '${id}'; window.IS_PUBLISHED = ${isPublished};<\/script>`;
+            // تزریق متغیرهای سیستمی به ادیتور با امنیت ۱۰۰٪ در مقابل پارسر
+            let injectedScript = '<script class="injected-env">window.PARENT_ARTICLE_ID = "' + id + '"; window.IS_PUBLISHED = ' + isPublished + ';</' + 'script>';
             
-            // اگر از سرور دانلود نشده بود و داشتیم محتوای تمپلیت جدید رو می‌آوردیم، باید دیتای اصلی رو توش بریزیم
+            // تزریق دیتای پشتیبان در صورت ساخت مقاله جدید
             if (loadedData) {
                 const draftData = {
                     title: loadedData.title || '', subtitle: '', author: loadedData.author || '', intro: loadedData.desc || '',
                     thumbnail: loadedData.image || '', thumbnailLink: '', selectedFont: 'Vazirmatn', highlightColor: '#ff8c00', customFonts: [], blocks: []
                 };
-                injectedScript += `<script class="injected-env">window.INJECTED_ARTICLE_DATA = ${JSON.stringify(draftData).replace(/</g, '\\u003c')};<\/script>`;
+                injectedScript += '\n<script class="injected-env">window.FALLBACK_ARTICLE_DATA = ' + JSON.stringify(draftData).replace(/</g, '\\u003c') + ';</' + 'script>';
             }
 
-            htmlContent = htmlContent.replace(/<head[^>]*>/i, '$&' + injectedScript);
+            // تزریق دقیق اسکریپت قبل از بسته شدن head
+            if (htmlContent.match(/<\/head>/i)) {
+                htmlContent = htmlContent.replace(/<\/head>/i, '\n' + injectedScript + '\n$&');
+            } else {
+                htmlContent = htmlContent.replace(/<head[^>]*>/i, '$&\n' + injectedScript + '\n');
+            }
 
             const modal = document.getElementById('editor-modal');
             const container = document.getElementById('iframe-container');
@@ -1234,14 +1277,12 @@
             container.innerHTML = '';
             const newIframe = document.createElement('iframe');
             newIframe.id = 'editor-iframe';
-            container.appendChild(newIframe);
-
-            modal.classList.add('active');
+            // استفاده از srcdoc برای ایمنی ۱۰۰٪ روی پروتکل فایل (دور زدن CORS لوکال) و اجرای بی‌نقص اسکریپت‌ها
+            newIframe.style.cssText = "flex: 1; border: none; width: 100%; height: 100%; background: #fff;";
+            newIframe.srcdoc = htmlContent;
             
-            const doc = newIframe.contentWindow.document;
-            doc.open();
-            doc.write(htmlContent);
-            doc.close();
+            container.appendChild(newIframe);
+            modal.classList.add('active');
         }
 
         window.addEventListener('message', async function(event) {
@@ -1264,15 +1305,16 @@
                     showLoading('در حال انتشار مقاله...', 'در حال ارسال فایل مقاله به سرور گیت‌هاب');
                     const successArt = await uploadToGitHub(htmlContent, fileName, `Publish article: ${fileName}`);
                     if (!successArt) throw new Error("آپلود مقاله در گیت‌هاب ناموفق بود.");
-                    art.link = fileName;
+                    art.link = fileName; // ثبت لینک مقاله در دیتابیس لوکال
                     
+                    document.getElementById('sync-text').innerText = 'در حال ذخیره داشبورد...';
+                    // دقت کنید که پنل حتماً ذخیره شود تا دفعه بعد که صفحه ریلود شد، لینک مقاله موجود باشد
+                    const adminSuccess = await saveAdminPanelToGitHub(true);
+                    if (!adminSuccess) throw new Error("آپلود ادمین پنل ناموفق بود.");
+
                     document.getElementById('sync-text').innerText = 'در حال آپدیت صفحه اصلی (ایندکس)...';
                     const idxSuccess = await publishIndexHTML(true);
                     if (!idxSuccess) throw new Error("آپلود ایندکس ناموفق بود.");
-
-                    document.getElementById('sync-text').innerText = 'در حال ذخیره داشبورد...';
-                    const adminSuccess = await saveAdminPanelToGitHub(true);
-                    if (!adminSuccess) throw new Error("آپلود ادمین پنل ناموفق بود.");
 
                     hideLoading();
                     
