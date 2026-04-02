@@ -139,6 +139,7 @@
 
     <!-- 
       =========== مخزن امن کدهای ویرایشگر =========== 
+      کدهای فایل ادیتور به صورت کاملاً یکپارچه و بدون هیچ خطای Syntax و تداخل در اینجا قرار گرفته است.
     -->
     <textarea id="editor-template" style="display:none;">&lt;!DOCTYPE html&gt;
 &lt;html lang="fa" dir="rtl"&gt;
@@ -147,7 +148,6 @@
     &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
     &lt;title&gt;اپلیکیشن مقاله‌نویس حرفه‌ای (Live)&lt;/title&gt;
     &lt;link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&amp;display=swap" rel="stylesheet"&gt;
-    &lt;script type="application/json" id="saved-article-data"&gt;&lt;/script&gt;
     &lt;style id="custom-fonts-style"&gt;&lt;/style&gt;
     &lt;style&gt;
         :root { --bg-color: #f0f2f5; --surface-color: #ffffff; --primary-color: #0056b3; --primary-hover: #004494; --text-color: #212529; --text-muted: #6c757d; --border-color: #dee2e6; --danger-color: #dc3545; --success-color: #28a745; --warning-color: #ffc107; --highlight-color: #ff8c00; --radius: 8px; --spacing-sm: 8px; --spacing-md: 16px; --spacing-lg: 24px; }
@@ -171,16 +171,6 @@
         .editor-subtitle { font-size: 1.5em; color: var(--text-muted); margin-bottom: 20px; font-weight: normal; }
         .editor-author { font-size: 1em; color: var(--text-muted); margin-bottom: 20px; }
         .editor-intro { font-style: italic; font-size: 1.1em; border-right: 4px solid var(--primary-color); padding-right: 15px; background: var(--bg-color); padding: 15px; margin-bottom: 30px; line-height: 1.8; transition: background-color 0.3s;}
-        
-        /* Banner Upload Redesign */
-        .cover-upload-area { border: 2px dashed var(--border-color); border-radius: var(--radius); padding: 40px 20px; text-align: center; background: var(--bg-color); cursor: pointer; transition: all 0.3s; margin-bottom: 30px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .cover-upload-area:hover { border-color: var(--primary-color); background: rgba(0,86,179,0.03); }
-        .cover-preview { width: 100%; max-height: 400px; object-fit: cover; border-radius: var(--radius); display: block; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 0; }
-        .cover-overlay-actions { position: absolute; top: 10px; right: 10px; left: 10px; display: flex; gap: 10px; justify-content: center; opacity: 0; transition: opacity 0.3s; }
-        .cover-upload-area:hover .cover-overlay-actions { opacity: 1; }
-        .cover-action-btn { background: rgba(255,255,255,0.9); backdrop-filter: blur(5px); border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; color: #333; font-size: 0.85em; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.2s; font-family: inherit;}
-        .cover-action-btn:hover { transform: scale(1.05); }
-
         .blocks-container { display: flex; flex-direction: column; gap: var(--spacing-md); min-height: 50vh; }
         .block-wrapper { position: relative; padding: 10px; border: 2px solid transparent; border-radius: var(--radius); transition: border-color 0.2s; }
         .block-wrapper:hover { border-color: var(--border-color); }
@@ -211,8 +201,7 @@
         .btn-success { background-color: var(--success-color); color: white; }
         .btn-outline { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-color); }
         .btn-outline:hover { background: var(--bg-color); }
-        select, input[type="file"], input[type="color"], input[type="text"] { font-family: inherit; }
-        select, input[type="file"], input[type="color"] { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--surface-color); color: var(--text-color); }
+        select, input[type="file"], input[type="color"] { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-family: inherit; background: var(--surface-color); color: var(--text-color); }
         .toc-list { list-style: none; padding: 0; margin: 0; }
         .toc-list a { text-decoration: none; color: var(--text-muted); font-size: 0.9em; display: block; padding: 4px 0; transition: color 0.2s; }
         .toc-list a:hover { color: var(--primary-color); }
@@ -254,6 +243,12 @@
                 &lt;div class="progress-wrapper"&gt;&lt;div class="progress-bar" id="reading-progress"&gt;&lt;/div&gt;&lt;/div&gt;
                 &lt;div class="progress-text" id="reading-percent"&gt;0% خوانده شده&lt;/div&gt;
             &lt;/div&gt;
+            &lt;div class="sidebar-panel" style="display:none;"&gt;
+                &lt;div class="panel-title"&gt;مدیریت پروژه&lt;/div&gt;
+                &lt;button class="btn btn-success" onclick="saveProject()"&gt;ذخیره پروژه (JSON)&lt;/button&gt;
+                &lt;button class="btn btn-primary" onclick="saveHTMLProject()" style="background-color: #17a2b8;"&gt;ذخیره ویرایشگر (HTML)&lt;/button&gt;
+                &lt;label class="btn btn-outline" style="display: block; margin: 0;"&gt;بارگذاری پروژه پیشین&lt;input type="file" accept=".json" style="display: none;" onchange="loadProject(event)"&gt;&lt;/label&gt;
+            &lt;/div&gt;
             &lt;div class="sidebar-panel"&gt;
                 &lt;div class="panel-title"&gt;تنظیمات و خروجی&lt;/div&gt;
                 &lt;label style="font-size: 0.9em; font-weight: bold; margin-bottom: 5px; display: block;"&gt;رنگ متن برجسته (&amp;متن&amp;):&lt;/label&gt;
@@ -267,39 +262,18 @@
         &lt;/aside&gt;
         &lt;main class="main-workspace" id="scroll-container" onscroll="updateScrollProgress()"&gt;
             &lt;div id="editor-header"&gt;
-                
-                &lt;!-- کاور مقاله بازطراحی شده --&gt;
-                &lt;div id="editor-thumbnail-container"&gt;
-                    
-                    &lt;!-- حالت خالی --&gt;
-                    &lt;div id="cover-empty-state" class="cover-upload-area" onclick="document.getElementById('thumb-upload-input').click()"&gt;
-                        &lt;div style="font-size: 3em; opacity: 0.5; margin-bottom: 10px;"&gt;🖼️&lt;/div&gt;
-                        &lt;div style="font-weight: bold; color: var(--text-color); font-size: 1.2em;"&gt;افزودن تصویر کاور مقاله&lt;/div&gt;
-                        &lt;div style="font-size: 0.9em; color: var(--text-muted); margin-top: 5px;"&gt;برای آپلود از سیستم کلیک کنید&lt;/div&gt;
-                        
-                        &lt;div style="margin-top: 20px; display: flex; gap: 5px; width: 100%; max-width: 400px;" onclick="event.stopPropagation()"&gt;
-                            &lt;input type="text" id="editor-thumbnail-url-input" placeholder="یا آدرس عکس را وارد کنید (http...)" style="flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--surface-color); color: var(--text-color); font-size: 0.85em; text-align: left; direction: ltr; margin: 0;"&gt;
-                            &lt;button class="btn btn-primary" style="margin: 0; width: auto; padding: 10px 15px; font-size: 0.85em;" onclick="handleThumbnailUrl()"&gt;اعمال&lt;/button&gt;
+                &lt;div id="editor-thumbnail-container" style="position: relative; margin-bottom: 30px; text-align: center;"&gt;
+                    &lt;img id="editor-thumbnail-img" style="max-width: 100%; max-height: 400px; border-radius: var(--radius); display: none; object-fit: cover; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.1);"&gt;
+                    &lt;div id="editor-thumbnail-link-container" style="display: none; margin-top: 10px;"&gt;&lt;input type="text" id="editor-thumbnail-link" placeholder="لینک تصویر (اختیاری)... مثلاً https://example.com" style="width: 60%; max-width: 400px; padding: 8px; border: 1px dashed var(--border-color); border-radius: 4px; background: var(--bg-color); color: var(--text-color); font-size: 0.85em; text-align: left; direction: ltr;" oninput="updateThumbnailLink()"&gt;&lt;/div&gt;
+                    &lt;div id="editor-thumbnail-actions" style="margin-top: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; align-items: center;"&gt;
+                        &lt;label id="editor-thumbnail-label" class="btn btn-outline" style="margin: 0; width: auto; font-size: 0.85em; padding: 8px 15px; cursor: pointer;"&gt;🖼 آپلود از سیستم&lt;input type="file" accept="image/*" style="display: none;" onchange="handleThumbnailUpload(event)"&gt;&lt;/label&gt;
+                        &lt;div id="editor-thumbnail-url-container" style="display: flex; gap: 5px; align-items: center;"&gt;
+                            &lt;input type="text" id="editor-thumbnail-url-input" placeholder="یا آدرس اینترنتی عکس..." style="padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-color); color: var(--text-color); font-size: 0.85em; width: 200px; text-align: left; direction: ltr; margin: 0;"&gt;
+                            &lt;button class="btn btn-primary" style="margin: 0; width: auto; padding: 8px 15px; font-size: 0.85em;" onclick="handleThumbnailUrl()"&gt;اعمال&lt;/button&gt;
                         &lt;/div&gt;
+                        &lt;button id="btn-remove-thumbnail" class="btn btn-danger" style="display: none; margin: 0; width: auto; font-size: 0.85em; padding: 8px 15px;" onclick="removeThumbnail()"&gt;حذف تصویر&lt;/button&gt;
                     &lt;/div&gt;
-
-                    &lt;!-- حالت پر شده --&gt;
-                    &lt;div id="cover-preview-state" style="display: none;" class="cover-upload-area"&gt;
-                        &lt;img id="editor-thumbnail-img" class="cover-preview"&gt;
-                        &lt;div class="cover-overlay-actions"&gt;
-                            &lt;button class="cover-action-btn" onclick="document.getElementById('thumb-upload-input').click()"&gt;🔄 تغییر تصویر&lt;/button&gt;
-                            &lt;button class="cover-action-btn" onclick="removeThumbnail()" style="color: var(--danger-color);"&gt;🗑 حذف&lt;/button&gt;
-                        &lt;/div&gt;
-                        &lt;div style="margin-top: 15px; width: 100%; max-width: 400px;" onclick="event.stopPropagation()"&gt;
-                             &lt;input type="text" id="editor-thumbnail-link" placeholder="لینک ارجاع هنگام کلیک روی کاور در سایت (اختیاری)..." style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--surface-color); color: var(--text-color); font-size: 0.85em; text-align: left; direction: ltr;" oninput="updateThumbnailLink()"&gt;
-                        &lt;/div&gt;
-                    &lt;/div&gt;
-                    
-                    &lt;!-- اینپوت مخفی --&gt;
-                    &lt;input type="file" id="thumb-upload-input" accept="image/*" style="display: none;" onchange="handleThumbnailUpload(event)"&gt;
                 &lt;/div&gt;
-                &lt;!-- پایان بخش کاور --&gt;
-
                 &lt;div class="editor-title" contenteditable="true" data-placeholder="عنوان مقاله را اینجا بنویسید..." id="field-title" oninput="updateHeaderData('title')" onblur="parseInlineFormatting('field-title', 'title')"&gt;&lt;/div&gt;
                 &lt;div class="editor-subtitle" contenteditable="true" data-placeholder="زیرتیتر مقاله (اختیاری)..." id="field-subtitle" oninput="updateHeaderData('subtitle')" onblur="parseInlineFormatting('field-subtitle', 'subtitle')"&gt;&lt;/div&gt;
                 &lt;div class="editor-author" contenteditable="true" data-placeholder="نام نویسنده (مثال: کیومرث)" id="field-author" oninput="updateHeaderData('author')" onblur="parseInlineFormatting('field-author', 'author')"&gt;&lt;/div&gt;
@@ -319,57 +293,23 @@
         function toggleAppTheme() { var isDark = document.documentElement.getAttribute('data-theme') === 'dark'; document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark'); localStorage.setItem('editor-theme', isDark ? 'light' : 'dark'); document.getElementById('appThemeBtn').innerText = isDark ? '🌙' : '☀️'; }
         if (localStorage.getItem('editor-theme') === 'dark') { document.documentElement.setAttribute('data-theme', 'dark'); }
 
-        // اجرای فوری بدون تکیه بر onload
-        (function initEditor() {
+        window.onload = function() {
             var themeBtn = document.getElementById('appThemeBtn'); if (themeBtn &amp;&amp; document.documentElement.getAttribute('data-theme') === 'dark') themeBtn.innerText = '☀️';
-            
-            var isPub = window.IS_PUBLISHED === true;
-            
-            var savedDataNode = document.getElementById('saved-article-data');
-            if (savedDataNode &amp;&amp; savedDataNode.textContent &amp;&amp; savedDataNode.textContent.trim() !== '') {
-                try {
-                    articleData = JSON.parse(savedDataNode.textContent);
-                } catch(e) { console.error('خطا در خواندن دیتای ذخیره شده مقاله:', e); }
-            } else if (window.FALLBACK_ARTICLE_DATA) {
-                articleData = window.FALLBACK_ARTICLE_DATA;
-            }
-
-            document.getElementById('field-title').innerHTML = articleData.title || ''; 
-            document.getElementById('field-subtitle').innerHTML = articleData.subtitle || ''; 
-            document.getElementById('field-author').innerHTML = articleData.author || ''; 
-            document.getElementById('field-intro').innerHTML = articleData.intro || '';
-            
-            updateCustomFontsStyle(); 
-            updateFontSelector(); 
-            changeFont();
-            var picker = document.getElementById('highlight-color-picker'); if(picker) picker.value = articleData.highlightColor || '#ff8c00';
-            changeHighlightColor(); 
-            renderThumbnail();
-
-            var pubBtn = document.getElementById('publishBtn'); 
-            if (pubBtn) { 
-                pubBtn.innerText = isPub ? '🔄 به‌روزرسانی مقاله' : '🚀 انتشار در سایت'; 
-                pubBtn.disabled = false; 
-            }
-
+            var pubBtn = document.getElementById('publishBtn'); if (pubBtn) { pubBtn.innerText = window.IS_PUBLISHED ? '🔄 به‌روزرسانی مقاله' : '🚀 انتشار در سایت'; pubBtn.disabled = false; }
+            if (window.INJECTED_ARTICLE_DATA) {
+                articleData = window.INJECTED_ARTICLE_DATA;
+                document.getElementById('field-title').innerHTML = articleData.title || ''; document.getElementById('field-subtitle').innerHTML = articleData.subtitle || ''; document.getElementById('field-author').innerHTML = articleData.author || ''; document.getElementById('field-intro').innerHTML = articleData.intro || '';
+                updateCustomFontsStyle(); updateFontSelector(); changeFont();
+                var picker = document.getElementById('highlight-color-picker'); if(picker) picker.value = articleData.highlightColor || '#ff8c00';
+                changeHighlightColor(); renderThumbnail();
+            } else { changeHighlightColor(); }
             if(articleData.blocks.length === 0) { addBlock('p', false); }
             renderAllBlocks();
-        })();
+        };
 
         window.addEventListener('message', function(e) {
-            if (e.data &amp;&amp; e.data.action === 'PUBLISH_FAILED') { 
-                var btn = document.getElementById('publishBtn'); 
-                if (btn) { btn.innerText = window.IS_PUBLISHED ? '🔄 تلاش مجدد' : '🚀 تلاش مجدد'; btn.disabled = false; } 
-            }
-            if (e.data &amp;&amp; e.data.action === 'PUBLISH_SUCCESS') { 
-                var btn = document.getElementById('publishBtn'); 
-                if (btn) { 
-                    btn.innerText = '✅ انجام شد'; 
-                    btn.disabled = false; 
-                    window.IS_PUBLISHED = true; 
-                    setTimeout(function(){ if(btn) btn.innerText = '🔄 به‌روزرسانی مقاله'; }, 2000); 
-                } 
-            }
+            if (e.data &amp;&amp; e.data.action === 'PUBLISH_FAILED') { var btn = document.getElementById('publishBtn'); if (btn) { btn.innerText = window.IS_PUBLISHED ? '🔄 تلاش مجدد' : '🚀 تلاش مجدد'; btn.disabled = false; } }
+            if (e.data &amp;&amp; e.data.action === 'PUBLISH_SUCCESS') { var btn = document.getElementById('publishBtn'); if (btn) { btn.innerText = '✅ انجام شد'; btn.disabled = false; window.IS_PUBLISHED = true; setTimeout(function(){ if(btn) btn.innerText = '🔄 به‌روزرسانی مقاله'; }, 2000); } }
         });
 
         document.addEventListener('paste', function(e) { if (e.target.isContentEditable) { e.preventDefault(); var text = (e.clipboardData || window.clipboardData).getData('text/plain'); document.execCommand('insertText', false, text); } });
@@ -378,30 +318,14 @@
         function updateHeaderData(field) { var el = document.getElementById('field-'+field); if(el) articleData[field] = el.innerHTML; }
         function parseInlineFormatting(elementId, dataField, isBlock) { var el = document.getElementById(elementId); if (!el) return; var html = el.innerHTML; var originalHtml = html; html = html.replace(/\*(.*?)\*/g, '&lt;strong&gt;$1&lt;/strong&gt;'); html = html.replace(/&amp;(.*?)&amp;/g, '&lt;span class="custom-highlight"&gt;$1&lt;/span&gt;'); if (html !== originalHtml) { el.innerHTML = html; if (isBlock) onBlockInput(dataField, html); else articleData[dataField] = html; } }
         function parseCaptionFormatting(elementId, blockId) { var el = document.getElementById(elementId); if (!el) return; var html = el.innerHTML; var originalHtml = html; html = html.replace(/\*(.*?)\*/g, '&lt;strong&gt;$1&lt;/strong&gt;'); html = html.replace(/&amp;(.*?)&amp;/g, '&lt;span class="custom-highlight"&gt;$1&lt;/span&gt;'); if (html !== originalHtml) { el.innerHTML = html; var block = articleData.blocks.find(function(b){return b.id === blockId}); if (block) block.caption = html; } }
-        
         function handleThumbnailUpload(event) { var file = event.target.files[0]; if (!file) return; var reader = new FileReader(); reader.onload = function(e) { articleData.thumbnail = e.target.result; renderThumbnail(); }; reader.readAsDataURL(file); }
-        function removeThumbnail() { articleData.thumbnail = ''; articleData.thumbnailLink = ''; renderThumbnail(); }
+        function removeThumbnail() { articleData.thumbnail = ''; articleData.thumbnailLink = ''; document.getElementById('editor-thumbnail-img').src = ''; document.getElementById('editor-thumbnail-link').value = ''; renderThumbnail(); }
         function updateThumbnailLink() { var linkInput = document.getElementById('editor-thumbnail-link'); if(linkInput) articleData.thumbnailLink = linkInput.value.trim(); }
         function handleThumbnailUrl() { var urlInput = document.getElementById('editor-thumbnail-url-input'); if (urlInput &amp;&amp; urlInput.value.trim()) { articleData.thumbnail = urlInput.value.trim(); renderThumbnail(); } }
         
         function renderThumbnail() {
-            var emptyState = document.getElementById('cover-empty-state');
-            var previewState = document.getElementById('cover-preview-state');
-            var img = document.getElementById('editor-thumbnail-img');
-            var linkInput = document.getElementById('editor-thumbnail-link');
-            var urlInput = document.getElementById('editor-thumbnail-url-input');
-
-            if (articleData.thumbnail) {
-                img.src = articleData.thumbnail;
-                emptyState.style.display = 'none';
-                previewState.style.display = 'flex';
-                if(linkInput) linkInput.value = articleData.thumbnailLink || '';
-            } else {
-                emptyState.style.display = 'flex';
-                previewState.style.display = 'none';
-                img.src = '';
-                if(urlInput) urlInput.value = '';
-            }
+            var img = document.getElementById('editor-thumbnail-img'); var removeBtn = document.getElementById('btn-remove-thumbnail'); var addLabel = document.getElementById('editor-thumbnail-label'); var linkContainer = document.getElementById('editor-thumbnail-link-container'); var linkInput = document.getElementById('editor-thumbnail-link'); var urlContainer = document.getElementById('editor-thumbnail-url-container'); var urlInput = document.getElementById('editor-thumbnail-url-input');
+            if (articleData.thumbnail) { img.src = articleData.thumbnail; img.style.display = 'block'; removeBtn.style.display = 'inline-block'; linkContainer.style.display = 'block'; linkInput.value = articleData.thumbnailLink || ''; addLabel.innerHTML = 'تغییر تصویر &lt;input type="file" accept="image/*" style="display:none" onchange="handleThumbnailUpload(event)"&gt;'; if(urlContainer) urlContainer.style.display = 'none'; } else { img.style.display = 'none'; removeBtn.style.display = 'none'; linkContainer.style.display = 'none'; addLabel.innerHTML = '🖼 آپلود از سیستم &lt;input type="file" accept="image/*" style="display:none" onchange="handleThumbnailUpload(event)"&gt;'; if(urlContainer) { urlContainer.style.display = 'flex'; if(urlInput) urlInput.value = ''; } }
         }
 
         function addBlock(type, focusAfterRender) {
@@ -580,13 +504,13 @@
 
                 var docClone = document.documentElement.cloneNode(true);
                 
-                // پاکسازی تزریق‌های محیطی برای جلوگیری از خطای پارسر
+                // پاکسازی تزریق‌های محیطی برای جلوگیری از تداخل در دفعات بعدی
                 var envScripts = docClone.querySelectorAll('.injected-env');
                 envScripts.forEach(function(s) { s.remove(); });
-                
+                // برای پاکسازی کدهای قدیمی که کلاس نداشتند
                 var oldScripts = docClone.querySelectorAll('script');
                 oldScripts.forEach(function(s) {
-                    if (s.textContent.includes("window.PARENT_ARTICLE_ID =") &amp;&amp; s.textContent.includes("window.IS_PUBLISHED =")) {
+                    if (s.textContent.includes("window.PARENT_ARTICLE_ID = '") &amp;&amp; s.textContent.includes("window.IS_PUBLISHED = ")) {
                         s.remove();
                     }
                 });
@@ -596,23 +520,12 @@
 
                 var safeEmpty = function(sel) { var el = docClone.querySelector(sel); if(el) el.innerHTML = ''; };
                 safeEmpty('#live-blocks-container'); safeEmpty('#sidebar-toc'); safeEmpty('#field-title'); safeEmpty('#field-subtitle'); safeEmpty('#field-author'); safeEmpty('#field-intro'); safeEmpty('#custom-fonts-style');
+                var thumbImg = docClone.querySelector('#editor-thumbnail-img'); if (thumbImg) { thumbImg.src = ''; thumbImg.style.display = 'none'; }
                 
-                var emptyState = docClone.querySelector('#cover-empty-state'); if(emptyState) emptyState.style.display = 'flex';
-                var prevState = docClone.querySelector('#cover-preview-state'); if(prevState) prevState.style.display = 'none';
-                var thumbImg = docClone.querySelector('#editor-thumbnail-img'); if (thumbImg) { thumbImg.src = ''; }
-                
-                // تزریق امن و مطمئن دیتا به فایل
-                var dataNode = docClone.querySelector('#saved-article-data');
-                if (dataNode) {
-                    dataNode.textContent = JSON.stringify(articleData).replace(/&lt;/g, '\\u003c');
-                } else {
-                    var newDataNode = document.createElement('script');
-                    newDataNode.type = 'application/json';
-                    newDataNode.id = 'saved-article-data';
-                    newDataNode.textContent = JSON.stringify(articleData).replace(/&lt;/g, '\\u003c');
-                    var head = docClone.querySelector('head');
-                    if (head) head.appendChild(newDataNode);
-                }
+                var dataScript = docClone.querySelector('#injected-data') || document.createElement('script'); 
+                dataScript.id = 'injected-data'; 
+                dataScript.textContent = 'window.INJECTED_ARTICLE_DATA = ' + JSON.stringify(articleData).replace(/&lt;/g, '\\u003c') + ';';
+                if(!docClone.querySelector('#injected-data')) { var head = docClone.querySelector('head'); if(head) head.appendChild(dataScript); }
                 
                 var rawEditorHTML = '&lt;!DOCTYPE html&gt;\n&lt;html lang="fa" dir="rtl"&gt;\n' + docClone.innerHTML + '\n&lt;/html&gt;';
                 var base64Editor = btoa(unescape(encodeURIComponent(rawEditorHTML)));
@@ -627,7 +540,6 @@
                 '                var rawScript = document.getElementById(\'raw-editor-html\');\n' +
                 '                if (rawScript) {\n' +
                 '                    var content = rawScript.textContent.trim();\n' +
-                '                    content = content.replace(/\\s/g, "");\n' +
                 '                    var editorHtml = "";\n' +
                 '                    if (content.startsWith("%253C")) editorHtml = unescape(decodeURIComponent(content));\n' +
                 '                    else if (content.startsWith("%3C")) editorHtml = decodeURIComponent(content);\n' +
@@ -672,7 +584,7 @@
                 '        .progress-container { width: 100%; height: 8px; background-color: var(--border-color); border-radius: 4px; margin-top: 1.5em; overflow: hidden;}\n' +
                 '        .progress-bar { height: 100%; background: var(--primary-color); width: 0%; border-radius: 4px; }\n' +
                 '        .progress-text { font-size: 0.8em; opacity: 0.7; margin-top: 0.5em; }\n' +
-                '        .theme-toggle { position: fixed; bottom: 20px; left: 20px; background: var(--primary-color); color: white !important; border: none; padding: 0; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2em; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 10000; transition: transform 0.2s;}\n' +
+                '        .theme-toggle { position: fixed; bottom: 20px; left: 20px; background-color: var(--primary-color); color: white !important; border: none; padding: 0; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2em; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 10000; transition: transform 0.2s;}\n' +
                 '        .theme-toggle:active { transform: scale(0.9); }\n' +
                 '        .toc-toggle-btn { display: none; }\n' +
                 '        .sidebar-overlay { display: none; }\n' +
@@ -726,28 +638,17 @@
                 '&lt;/body&gt;\n' +
                 '&lt;/html&gt;';
 
-                try {
-                    if (window.parent &amp;&amp; window.PARENT_ARTICLE_ID) {
-                        if(btn) { btn.innerText = '⏳ در حال ارسال به پنل...'; }
-                        window.parent.postMessage({ action: 'PUBLISH_FROM_EDITOR', articleId: window.PARENT_ARTICLE_ID, htmlContent: finalHTML, title: articleData.title.replace(/&lt;[^&gt;]*&gt;?/gm, '').trim() || 'بدون عنوان', desc: articleData.intro.replace(/&lt;[^&gt;]*&gt;?/gm, '').trim() || 'بدون توضیحات', author: articleData.author.replace(/&lt;[^&gt;]*&gt;?/gm, '').trim() || 'نویسنده ناشناس', coverImage: articleData.thumbnail || '' }, '*');
-                    } else {
-                        alert("توجه: این ویرایشگر به صورت مجزا (آفلاین) اجرا شده است، بنابراین فایل دانلود می‌شود.\nبرای انتشار روی گیت‌هاب، لطفاً ویرایشگر را از طریق فایل ایندکس‌ساز باز کنید.");
-                        var blob = new Blob([finalHTML], { type: 'text/html;charset=utf-8' });
-                        var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-                        a.download = (articleData.title.replace(/&lt;[^&gt;]*&gt;?/gm, '') || 'article') + '_export.html';
-                        a.click();
-                        if(btn) { btn.innerText = window.IS_PUBLISHED ? '🔄 به‌روزرسانی مقاله' : '🚀 انتشار در سایت'; btn.disabled = false; }
-                    }
-                } catch(secErr) {
-                    // Fallback اگر مرورگر در محیط Local فایل مانع دسترسی window.parent شد
-                    alert("توجه: بدلیل اجرای فایل آفلاین در مرورگر کروم، ارتباط با پنل مسدود شد. فایل مستقیما دانلود میشود.");
+                if (window.parent &amp;&amp; window.PARENT_ARTICLE_ID) {
+                    if(btn) { btn.innerText = '⏳ در حال ارسال به پنل...'; }
+                    window.parent.postMessage({ action: 'PUBLISH_FROM_EDITOR', articleId: window.PARENT_ARTICLE_ID, htmlContent: finalHTML, title: articleData.title.replace(/&lt;[^&gt;]*&gt;?/gm, '').trim() || 'بدون عنوان', desc: articleData.intro.replace(/&lt;[^&gt;]*&gt;?/gm, '').trim() || 'بدون توضیحات', author: articleData.author.replace(/&lt;[^&gt;]*&gt;?/gm, '').trim() || 'نویسنده ناشناس', coverImage: articleData.thumbnail || '' }, '*');
+                } else {
+                    alert("توجه: این ویرایشگر به صورت مجزا (آفلاین) اجرا شده است، بنابراین فایل دانلود می‌شود.\nبرای انتشار روی گیت‌هاب، لطفاً ویرایشگر را از طریق فایل ایندکس‌ساز باز کنید.");
                     var blob = new Blob([finalHTML], { type: 'text/html;charset=utf-8' });
                     var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
                     a.download = (articleData.title.replace(/&lt;[^&gt;]*&gt;?/gm, '') || 'article') + '_export.html';
                     a.click();
                     if(btn) { btn.innerText = window.IS_PUBLISHED ? '🔄 به‌روزرسانی مقاله' : '🚀 انتشار در سایت'; btn.disabled = false; }
                 }
-                
             } catch(e) {
                 console.error(e);
                 alert("خطا در هنگام آماده‌سازی خروجی: " + e.message);
@@ -773,10 +674,10 @@
     },
     "articles": [
         {
-            "id": "art-1775142851682",
-            "title": "طلوعی دیگر",
+            "id": "art-1775142977666",
+            "title": "تست مقاله",
             "desc": "توضیحات کوتاه مقاله را اینجا بنویسید...",
-            "link": "article_1775142878478.html",
+            "link": "article_1775142988528.html",
             "image": "",
             "author": "نام نویسنده",
             "date": "۱۴۰۵/۱/۱۳",
@@ -1090,8 +991,7 @@
                     headers: { 
                         'Authorization': `Bearer ${GITHUB_TOKEN}`,
                         'Accept': 'application/vnd.github.v3.raw'
-                    },
-                    cache: 'no-store'
+                    } 
                 });
                 
                 if (response.ok) {
@@ -1122,7 +1022,7 @@
             const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${fileName}`;
             try {
                 let sha = null;
-                const getRes = await fetch(url, { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }, cache: 'no-store' });
+                const getRes = await fetch(url, { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } });
                 if (getRes.ok) {
                     const data = await getRes.json();
                     sha = data.sha;
@@ -1144,7 +1044,7 @@
             if (!GITHUB_TOKEN) return;
             const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${fileName}`;
             try {
-                const getRes = await fetch(url, { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }, cache: 'no-store' });
+                const getRes = await fetch(url, { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } });
                 if (!getRes.ok) return; 
                 const sha = (await getRes.json()).sha;
                 await fetch(url, {
@@ -1183,9 +1083,8 @@
             const fallbackTemplate = templateEl.value ? templateEl.value.trim() : templateEl.textContent.trim();
             
             let loadedData = null; // برای اطمینان از بارگیری اطلاعات اولیه روی فرم جدید
-            let isPublished = (art.link && art.link !== '#');
 
-            if (isPublished && art.link.endsWith('.html') && !art.link.startsWith('http')) {
+            if (art.link && art.link.endsWith('.html') && !art.link.startsWith('http') && art.link !== '#') {
                 showLoading('در حال بارگذاری ویرایشگر...', 'در حال دریافت اطلاعات آخرین نسخه مقاله از سرور');
                 try {
                     const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${art.link}?ref=${BRANCH}`;
@@ -1194,8 +1093,7 @@
                         headers: { 
                             'Authorization': `Bearer ${GITHUB_TOKEN}`,
                             'Accept': 'application/vnd.github.v3.raw'
-                        },
-                        cache: 'no-store'
+                        } 
                     });
                     
                     if (res.ok) {
@@ -1206,37 +1104,22 @@
                         
                         if (rawDataNode) {
                             let content = rawDataNode.textContent.trim();
-                            // رفع مشکل وجود فضای خالی در بیس ۶۴ 
-                            content = content.replace(/\s/g, '');
-                            try {
-                                if (content.startsWith('%253C')) htmlContent = unescape(decodeURIComponent(content));
-                                else if (content.startsWith('%3C')) htmlContent = decodeURIComponent(content);
-                                else htmlContent = decodeURIComponent(escape(atob(content)));
-                            } catch(err) {
-                                console.error('خطای بازگشایی کد Base64:', err);
-                                alert('خطا: کدهای ذخیره شده در سرور دچار خرابی شده‌اند!');
-                                hideLoading();
-                                return;
-                            }
+                            // پشتیبانی از فایل‌های ذخیره شده قدیمی‌تر و جدید Base64
+                            if (content.startsWith('%253C')) htmlContent = unescape(decodeURIComponent(content));
+                            else if (content.startsWith('%3C')) htmlContent = decodeURIComponent(content);
+                            else htmlContent = decodeURIComponent(escape(atob(content)));
                         } else {
-                            alert('خطا: فایل مقاله در سرور فاقد داده‌های ساختاری ویرایشگر است! (احتمالاً فایل صدمه دیده است)');
-                            hideLoading();
-                            return;
+                            htmlContent = fallbackTemplate;
+                            loadedData = art;
                         }
                     } else {
-                        if (res.status === 404) {
-                            alert('خطا: فایل مقاله هنوز در سرور گیت‌هاب ایجاد/پراکسس نشده است. لطفاً چند ثانیه دیگر دوباره امتحان کنید.');
-                        } else {
-                            alert(`خطای سرور (${res.status}): امکان بارگذاری مقاله وجود ندارد.`);
-                        }
-                        hideLoading();
-                        return; // جلوگیری از باز شدن قالب خالی!
+                        htmlContent = fallbackTemplate;
+                        loadedData = art;
                     }
                 } catch (e) {
                     console.error("Error loading article:", e);
-                    alert('خطا در ارتباط و بارگذاری مقاله از سرور!');
-                    hideLoading();
-                    return;
+                    htmlContent = fallbackTemplate;
+                    loadedData = art;
                 }
                 hideLoading();
             } else {
@@ -1248,28 +1131,24 @@
                 alert('خطا: کدهای قالب ادیتور یافت نشد!\nلطفاً کدهای ادیتور را به جای xxxxx قرار دهید.');
                 return;
             }
-            
-            // پاکسازی اسکریپت‌های تزریق شده قبلی (مخفی کردن از پارسر با شکستن تگ)
-            htmlContent = htmlContent.replace(new RegExp('<script class="injected-env">[\\s\\S]*?</' + 'script>', 'gi'), '');
 
-            // تزریق متغیرهای سیستمی به ادیتور با امنیت ۱۰۰٪ در مقابل پارسر
-            let injectedScript = '<script class="injected-env">window.PARENT_ARTICLE_ID = "' + id + '"; window.IS_PUBLISHED = ' + isPublished + ';</' + 'script>';
+            let isPublished = (art.link && art.link !== '#');
             
-            // تزریق دیتای پشتیبان در صورت ساخت مقاله جدید
+            // پاکسازی اسکریپت‌های تزریق شده در نسخه‌های قبلی تا دکمه "به‌روزرسانی" و متغیرهای محیطی به درستی عمل کنند
+            htmlContent = htmlContent.replace(/<script>window\.PARENT_ARTICLE_ID\s*=\s*'[^']+';\s*window\.IS_PUBLISHED\s*=\s*(true|false);<\/script>/gi, '');
+            htmlContent = htmlContent.replace(/<script class="injected-env">.*?<\/script>/gi, '');
+
+            let injectedScript = `<script class="injected-env">window.PARENT_ARTICLE_ID = '${id}'; window.IS_PUBLISHED = ${isPublished};<\/script>`;
+            
             if (loadedData) {
                 const draftData = {
                     title: loadedData.title || '', subtitle: '', author: loadedData.author || '', intro: loadedData.desc || '',
                     thumbnail: loadedData.image || '', thumbnailLink: '', selectedFont: 'Vazirmatn', highlightColor: '#ff8c00', customFonts: [], blocks: []
                 };
-                injectedScript += '\n<script class="injected-env">window.FALLBACK_ARTICLE_DATA = ' + JSON.stringify(draftData).replace(/</g, '\\u003c') + ';</' + 'script>';
+                injectedScript += `<script class="injected-env">window.INJECTED_ARTICLE_DATA = ${JSON.stringify(draftData).replace(/</g, '\\u003c')};<\/script>`;
             }
 
-            // تزریق دقیق اسکریپت قبل از بسته شدن head
-            if (htmlContent.match(/<\/head>/i)) {
-                htmlContent = htmlContent.replace(/<\/head>/i, '\n' + injectedScript + '\n$&');
-            } else {
-                htmlContent = htmlContent.replace(/<head[^>]*>/i, '$&\n' + injectedScript + '\n');
-            }
+            htmlContent = htmlContent.replace(/<head[^>]*>/i, '$&' + injectedScript);
 
             const modal = document.getElementById('editor-modal');
             const container = document.getElementById('iframe-container');
@@ -1277,12 +1156,14 @@
             container.innerHTML = '';
             const newIframe = document.createElement('iframe');
             newIframe.id = 'editor-iframe';
-            // استفاده از srcdoc برای ایمنی ۱۰۰٪ روی پروتکل فایل (دور زدن CORS لوکال) و اجرای بی‌نقص اسکریپت‌ها
-            newIframe.style.cssText = "flex: 1; border: none; width: 100%; height: 100%; background: #fff;";
-            newIframe.srcdoc = htmlContent;
-            
             container.appendChild(newIframe);
+
             modal.classList.add('active');
+            
+            const doc = newIframe.contentWindow.document;
+            doc.open();
+            doc.write(htmlContent);
+            doc.close();
         }
 
         window.addEventListener('message', async function(event) {
@@ -1305,27 +1186,24 @@
                     showLoading('در حال انتشار مقاله...', 'در حال ارسال فایل مقاله به سرور گیت‌هاب');
                     const successArt = await uploadToGitHub(htmlContent, fileName, `Publish article: ${fileName}`);
                     if (!successArt) throw new Error("آپلود مقاله در گیت‌هاب ناموفق بود.");
-                    art.link = fileName; // ثبت لینک مقاله در دیتابیس لوکال
+                    art.link = fileName;
                     
-                    document.getElementById('sync-text').innerText = 'در حال ذخیره داشبورد...';
-                    // دقت کنید که پنل حتماً ذخیره شود تا دفعه بعد که صفحه ریلود شد، لینک مقاله موجود باشد
-                    const adminSuccess = await saveAdminPanelToGitHub(true);
-                    if (!adminSuccess) throw new Error("آپلود ادمین پنل ناموفق بود.");
-
                     document.getElementById('sync-text').innerText = 'در حال آپدیت صفحه اصلی (ایندکس)...';
                     const idxSuccess = await publishIndexHTML(true);
                     if (!idxSuccess) throw new Error("آپلود ایندکس ناموفق بود.");
 
+                    document.getElementById('sync-text').innerText = 'در حال ذخیره داشبورد...';
+                    const adminSuccess = await saveAdminPanelToGitHub(true);
+                    if (!adminSuccess) throw new Error("آپلود ادمین پنل ناموفق بود.");
+
                     hideLoading();
+                    alert('✅ مقاله منتشر شد، کارت‌ها به‌روزرسانی شدند و پنل در سرور ذخیره شد!');
                     
-                    // ارسال پیام موفقیت به ادیتور برای تغییر دکمه به "انجام شد / به روز رسانی"
+                    // ارسال پیام موفقیت به ادیتور برای تغییر دکمه
                     const iframe = document.getElementById('editor-iframe');
                     if (iframe && iframe.contentWindow) {
                         iframe.contentWindow.postMessage({ action: 'PUBLISH_SUCCESS' }, '*');
                     }
-                    
-                    // نمایش پیام موفقیت 
-                    alert('✅ مقاله منتشر شد و تغییرات در سرور ذخیره گردید!');
                     closeEditorModal();
 
                 } catch(error) {
@@ -1498,8 +1376,6 @@
             if (!isSilent) { btn.innerText = '⏳ در حال ذخیره...'; btn.disabled = true; }
 
             const clonedDoc = document.cloneNode(true);
-            
-            // مطمئن می‌شویم دیتای جدید دقیقاً وارد تگ اسکریپت شده است.
             const dataScript = clonedDoc.getElementById('app-data');
             if(dataScript) dataScript.textContent = JSON.stringify(projectData, null, 4);
             
