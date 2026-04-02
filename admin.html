@@ -51,8 +51,8 @@
 
         /* گرید مقالات */
         main { flex: 1; padding: 2vh 5vw 8vh; max-width: 1400px; width: 100%; margin: 0 auto; }
-        .grid { column-width: 320px; column-gap: 2.5vw; }
-        .card { background: var(--surface); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-soft); transition: var(--transition); display: flex; flex-direction: column; position: relative; border: 1px solid rgba(0,0,0,0.02); break-inside: avoid; page-break-inside: avoid; -webkit-column-break-inside: avoid; margin-bottom: 2.5vw; width: 100%; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; align-items: stretch; }
+        .card { background: var(--surface); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-soft); transition: var(--transition); display: flex; flex-direction: column; position: relative; border: 1px solid rgba(0,0,0,0.02); width: 100%; }
         .card:hover { transform: translateY(-8px); box-shadow: var(--shadow-hover); }
         .card-img { height: 220px; background-color: #e2e8f0; background-size: cover; background-position: center; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .card-img::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 60%; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%); z-index: 1; }
@@ -68,10 +68,10 @@
         .card-title { font-size: 1.4rem; margin-bottom: 1.5vh; color: var(--text-main); font-weight: 800; line-height: 1.4; }
         .card-desc { color: var(--text-muted); margin-bottom: 3vh; flex: 1; font-size: 1rem; line-height: 1.7; font-weight: 300; text-align: justify; }
         .card-actions { padding: 0 2vw 3vh; display: flex; gap: 0.5vw; background: transparent; }
-        .btn-card { padding: 1vh 1vw; border: none; border-radius: var(--radius-md); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
+        .btn-card { padding: 1vh 1vw; border: none; border-radius: var(--radius-md); cursor: pointer; font-size: 1rem; font-weight: 600; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
         .btn-link { background: var(--bg); color: var(--text-main); flex: 1; }
         .btn-link:hover { background: #e2e8f0; }
-        .btn-icon { background: var(--bg); color: var(--text-muted); min-width: 35px; }
+        .btn-icon { background: var(--bg); color: var(--text-muted); min-width: 35px; flex: 1; }
         .btn-icon:hover { background: #e2e8f0; color: var(--text-main); }
         .btn-icon[disabled] { opacity: 0.3; cursor: not-allowed; }
         .btn-del { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
@@ -663,6 +663,16 @@
     },
     "articles": [
         {
+            "id": "art-1775115972428",
+            "title": "عنوان مقاله جدید",
+            "desc": "توضیحات کوتاه مقاله را اینجا بنویسید...",
+            "link": "#",
+            "image": "",
+            "author": "نام نویسنده",
+            "date": "۱۴۰۵/۱/۱۳",
+            "isVisible": false
+        },
+        {
             "id": "art-1775084645417",
             "title": "مقالع",
             "desc": "سیس",
@@ -678,7 +688,8 @@
             "link": "article_1775084564701.html",
             "image": "",
             "author": "نویسنده ناشناس",
-            "date": "۱۴۰۵/۱/۱۳"
+            "date": "۱۴۰۵/۱/۱۳",
+            "isVisible": true
         }
     ]
 }</script>
@@ -901,17 +912,29 @@
         function renderGrid() {
             const grid = document.getElementById('articles-grid');
             grid.innerHTML = '';
+            
+            // دکمه افزودن مقاله به اول لیست منتقل شد
+            const addCard = document.createElement('div');
+            addCard.className = 'card add-card';
+            addCard.onclick = addNewDraftArticle;
+            addCard.innerHTML = `<div class="add-card-icon">+</div><div class="add-card-text" id="add-card-txt">افزودن مقاله جدید</div>`;
+            grid.appendChild(addCard);
+
             projectData.articles.forEach((art, index) => {
                 const bgStyle = art.image ? `background-image: url('${art.image}');` : '';
                 const isFirst = index === 0;
                 const isLast = index === projectData.articles.length - 1;
                 const author = art.author || "نویسنده ناشناس";
                 const date = art.date || toFaDigit(new Date().toLocaleDateString('fa-IR'));
+                const isVisible = art.isVisible !== false; // پشتیبانی از نسخه‌های قبلی که مقدار isVisible ندارند
 
                 const card = document.createElement('div');
                 card.className = 'card';
+                if (!isVisible) card.style.opacity = '0.8';
+
                 card.innerHTML = `
                     <div class="card-img" style="${bgStyle}">
+                        ${!isVisible ? '<div style="position:absolute; top:15px; right:15px; background:#ef4444; color:white; padding:4px 10px; border-radius:12px; font-size:0.75rem; z-index:10; font-weight:bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">پیش‌نویس (مخفی)</div>' : ''}
                         <div class="card-img-actions">
                             <button class="card-img-btn" onclick="triggerArticleImageUpload('${art.id}')">آپلود</button>
                             <button class="card-img-btn" onclick="setArticleImageURL('${art.id}')">لینک</button>
@@ -927,6 +950,7 @@
                     </div>
                     <div class="card-actions">
                         <button class="btn-card btn-link" style="background:#e0f2fe; color:#0369a1;" onclick="openArticleEditor('${art.id}')">✍️ ویرایش / نوشتن مقاله</button>
+                        <button class="btn-card btn-icon" onclick="toggleVisibility('${art.id}')" title="${isVisible ? 'مخفی کردن از سایت' : 'نمایش در سایت'}">${isVisible ? '👁️' : '🙈'}</button>
                         <button class="btn-card btn-icon" onclick="moveArticle(${index}, -1)" ${isFirst ? 'disabled' : ''} title="انتقال به قبل">⬆</button>
                         <button class="btn-card btn-icon" onclick="moveArticle(${index}, 1)" ${isLast ? 'disabled' : ''} title="انتقال به بعد">⬇</button>
                         <button class="btn-card btn-icon btn-del" onclick="deleteArticle('${art.id}')" title="حذف">🗑</button>
@@ -934,12 +958,14 @@
                 `;
                 grid.appendChild(card);
             });
+        }
 
-            const addCard = document.createElement('div');
-            addCard.className = 'card add-card';
-            addCard.onclick = addNewDraftArticle;
-            addCard.innerHTML = `<div class="add-card-icon">+</div><div class="add-card-text" id="add-card-txt">افزودن مقاله جدید</div>`;
-            grid.appendChild(addCard);
+        function toggleVisibility(id) {
+            const art = projectData.articles.find(a => a.id === id);
+            if (art) {
+                art.isVisible = (art.isVisible === false) ? true : false;
+                renderGrid();
+            }
         }
 
         async function fetchLatestDataFromServer(isAuto = false) {
@@ -1025,7 +1051,8 @@
                 link: '#', 
                 image: '',
                 author: 'نام نویسنده',
-                date: toFaDigit(new Date().toLocaleDateString('fa-IR'))
+                date: toFaDigit(new Date().toLocaleDateString('fa-IR')),
+                isVisible: false // مقاله جدید به‌طور پیش‌فرض پیش‌نویس (مخفی) است
             });
             renderGrid();
         }
@@ -1132,6 +1159,7 @@
                 if(desc) updateArticleData(articleId, 'desc', desc);
                 if(author) updateArticleData(articleId, 'author', author);
                 if(coverImage) { art.image = coverImage; }
+                art.isVisible = true; // وقتی از داخل ادیتور روی انتشار کلیک شد، مقاله به‌طور خودکار نمایان شود
                 renderGrid();
 
                 const fileName = (art.link && art.link !== '#') ? art.link : `article_${Date.now()}.html`;
@@ -1373,6 +1401,7 @@
         async function publishIndexHTML(isSilent = false) {
             const set = projectData.settings;
             const arts = projectData.articles;
+            const visibleArts = arts.filter(a => a.isVisible !== false); // فقط مقالات منتشر شده
 
             let fontCSS = `@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');`;
             let fontName = "'Vazirmatn', sans-serif";
@@ -1383,10 +1412,10 @@
             }
 
             let articlesHTML = '';
-            if (arts.length === 0) {
-                articlesHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 4vh; color: #6b7280;">مقاله‌ای وجود ندارد.</p>';
+            if (visibleArts.length === 0) {
+                articlesHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 4vh; color: #6b7280;">در حال حاضر مقاله‌ای منتشر نشده است.</p>';
             } else {
-                arts.forEach(a => {
+                visibleArts.forEach(a => {
                     const imgStyle = a.image ? `background-image: url('${a.image}');` : `background-color: #f3f4f6;`;
                     const author = a.author || "نویسنده ناشناس";
                     const date = a.date || "";
@@ -1438,9 +1467,9 @@
         header p { font-size: clamp(1.1rem, 1.5vw, 1.3rem); opacity: 0.9; line-height: 1.8; font-weight: 300;}
         
         main { flex: 1; padding: 0 5vw 8vh; max-width: 1400px; width: 100%; margin: 0 auto; }
-        .grid { column-width: 320px; column-gap: 2.5vw; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; align-items: stretch; }
         
-        .card { background: var(--surface); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); display: flex; flex-direction: column; transition: transform 0.4s, box-shadow 0.4s; border: 1px solid rgba(0,0,0,0.02); break-inside: avoid; page-break-inside: avoid; -webkit-column-break-inside: avoid; margin-bottom: 2.5vw; width: 100%; }
+        .card { background: var(--surface); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); display: flex; flex-direction: column; transition: transform 0.4s, box-shadow 0.4s; border: 1px solid rgba(0,0,0,0.02); width: 100%; }
         .card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.12); }
         
         .card-img { height: 220px; background-size: cover; background-position: center; position: relative; display: flex; flex-direction: column; justify-content: flex-end; }
