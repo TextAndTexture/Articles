@@ -504,6 +504,17 @@
 
                 var docClone = document.documentElement.cloneNode(true);
                 
+                // پاکسازی تزریق‌های محیطی برای جلوگیری از تداخل در دفعات بعدی
+                var envScripts = docClone.querySelectorAll('.injected-env');
+                envScripts.forEach(function(s) { s.remove(); });
+                // برای پاکسازی کدهای قدیمی که کلاس نداشتند
+                var oldScripts = docClone.querySelectorAll('script');
+                oldScripts.forEach(function(s) {
+                    if (s.textContent.includes("window.PARENT_ARTICLE_ID = '") &amp;&amp; s.textContent.includes("window.IS_PUBLISHED = ")) {
+                        s.remove();
+                    }
+                });
+
                 var clonePubBtn = docClone.querySelector('#publishBtn');
                 if (clonePubBtn) { clonePubBtn.innerText = window.IS_PUBLISHED ? '🔄 به‌روزرسانی مقاله' : '🚀 انتشار در سایت'; clonePubBtn.disabled = false; }
 
@@ -664,7 +675,7 @@
     "articles": [
         {
             "id": "art-1775115972428",
-            "title": "عنوان مقاله جدید",
+            "title": "ایران",
             "desc": "توضیحات کوتاه مقاله را اینجا بنویسید...",
             "link": "#",
             "image": "",
@@ -677,7 +688,7 @@
             "title": "مقالع",
             "desc": "سیس",
             "link": "article_1775084668332.html",
-            "image": "",
+            "image": "https://i.ibb.co/QFs0F46D/sdesign.jpg",
             "author": "کیو",
             "date": "۱۴۰۵/۱/۱۳",
             "isVisible": true
@@ -748,7 +759,7 @@
             <label class="ctrl-label">فونت سفارشی</label>
             <button class="btn-action btn-outline" onclick="triggerFileInput('fontInput')">انتخاب فونت (TTF/WOFF)</button>
             <input type="file" id="fontInput" class="hidden-file" accept=".ttf,.woff,.woff2" onchange="updateCustomFont(this)">
-            <div id="font-status" class="small-hint">✅ فونت اعمال شد</div>
+            <div id="font-status" class="small-hint">✅ فونت شخصی فعال است</div>
         </div>
 
         <hr style="border:0; border-top:1px solid var(--border); margin: 3vh 0;">
@@ -1121,15 +1132,20 @@
                 return;
             }
 
-            // اگر قرار است از Fallback (قالب خام) استفاده شود، داده‌های اولیه (عنوان، نویسنده و...) را از دیتابیس پنل مستقیماً به آن تزریق می‌کنیم تا هرگز خالی باز نشود.
             let isPublished = (art.link && art.link !== '#');
-            let injectedScript = `<script>window.PARENT_ARTICLE_ID = '${id}'; window.IS_PUBLISHED = ${isPublished};<\/script>`;
+            
+            // پاکسازی اسکریپت‌های تزریق شده در نسخه‌های قبلی تا دکمه "به‌روزرسانی" و متغیرهای محیطی به درستی عمل کنند
+            htmlContent = htmlContent.replace(/<script>window\.PARENT_ARTICLE_ID\s*=\s*'[^']+';\s*window\.IS_PUBLISHED\s*=\s*(true|false);<\/script>/gi, '');
+            htmlContent = htmlContent.replace(/<script class="injected-env">.*?<\/script>/gi, '');
+
+            let injectedScript = `<script class="injected-env">window.PARENT_ARTICLE_ID = '${id}'; window.IS_PUBLISHED = ${isPublished};<\/script>`;
+            
             if (loadedData) {
                 const draftData = {
                     title: loadedData.title || '', subtitle: '', author: loadedData.author || '', intro: loadedData.desc || '',
                     thumbnail: loadedData.image || '', thumbnailLink: '', selectedFont: 'Vazirmatn', highlightColor: '#ff8c00', customFonts: [], blocks: []
                 };
-                injectedScript += `<script>window.INJECTED_ARTICLE_DATA = ${JSON.stringify(draftData).replace(/</g, '\\u003c')};<\/script>`;
+                injectedScript += `<script class="injected-env">window.INJECTED_ARTICLE_DATA = ${JSON.stringify(draftData).replace(/</g, '\\u003c')};<\/script>`;
             }
 
             htmlContent = htmlContent.replace(/<head[^>]*>/i, '$&' + injectedScript);
