@@ -370,6 +370,24 @@
             if (e.target.isContentEditable) { e.preventDefault(); var text = (e.clipboardData || window.clipboardData).getData('text/plain'); document.execCommand('insertText', false, text); }
         });
 
+        // افزوده شده برای حذف خودکار متن‌های نمونه هنگام کلیک (فوکوس) در ادیتور مقاله
+        document.addEventListener('focusin', function(e) {
+            if (e.target &amp;&amp; e.target.isContentEditable) {
+                var text = e.target.innerText.trim();
+                var sampleTexts = [
+                    'مجموعه مقالات',
+                    'برای ویرایش روی متن کلیک کنید. یک طراحی مینیمال برای ارائه بهتر محتوای شما.',
+                    'عنوان مقاله جدید',
+                    'توضیحات کوتاه مقاله را اینجا بنویسید...',
+                    'نام نویسنده',
+                    'نویسنده ناشناس'
+                ];
+                if (sampleTexts.includes(text)) {
+                    e.target.innerHTML = '';
+                }
+            }
+        });
+
         function toggleMobileSidebar() { document.querySelector('.sidebar').classList.toggle('active'); document.querySelector('.sidebar-overlay').classList.toggle('active'); }
         function changeHighlightColor() { var picker = document.getElementById('highlight-color-picker'); if(picker) { articleData.highlightColor = picker.value; document.documentElement.style.setProperty('--highlight-color', articleData.highlightColor); } }
         function updateHeaderData(field) { var el = document.getElementById('field-'+field); if(el) articleData[field] = el.innerHTML; }
@@ -751,7 +769,7 @@
             "desc": "توضیحات کوتاه مقاله را اینجا بنویسید...",
             "link": "article_1775144531231.html",
             "image": "",
-            "author": "نام نویسنده",
+            "author": "نویسنده ناشناس",
             "date": "۱۴۰۵/۱/۱۳",
             "isVisible": true
         },
@@ -884,13 +902,41 @@
             setTimeout(() => { document.getElementById('sync-overlay').style.display = 'none'; }, 400);
         }
 
-        let projectData = {};
+        let projectData = {
+            settings: {
+                siteName: "وبلاگ حرفه‌ای من",
+                headerTitle: "مجموعه مقالات",
+                headerDesc: "برای ویرایش روی متن کلیک کنید. یک طراحی مینیمال برای ارائه بهتر محتوای شما.",
+                themeColor: "#111827",
+                bgImageBase64: "",
+                customFontBase64: ""
+            },
+            articles: []
+        };
 
         document.addEventListener('paste', function(e) {
             if (e.target.getAttribute('contenteditable') === 'true' || e.target.isContentEditable) {
                 e.preventDefault();
                 const text = (e.originalEvent || e).clipboardData.getData('text/plain');
                 document.execCommand('insertText', false, text);
+            }
+        });
+
+        // افزوده شده برای حذف خودکار متن‌های نمونه هنگام کلیک (فوکوس) در داشبورد اصلی
+        document.addEventListener('focusin', function(e) {
+            if (e.target && (e.target.getAttribute('contenteditable') === 'true' || e.target.isContentEditable)) {
+                const text = e.target.innerText.trim();
+                const sampleTexts = [
+                    'مجموعه مقالات',
+                    'برای ویرایش روی متن کلیک کنید. یک طراحی مینیمال برای ارائه بهتر محتوای شما.',
+                    'عنوان مقاله جدید',
+                    'توضیحات کوتاه مقاله را اینجا بنویسید...',
+                    'نام نویسنده',
+                    'نویسنده ناشناس'
+                ];
+                if (sampleTexts.includes(text)) {
+                    e.target.innerHTML = '';
+                }
             }
         });
 
@@ -904,7 +950,21 @@
 
         function initData() {
             const dataScript = document.getElementById('app-data');
-            try { projectData = JSON.parse(dataScript.textContent); cleanDataWithFarsiDigits(projectData); } catch(e) { console.error("خطا در خواندن داده‌های اولیه", e); }
+            if (dataScript) {
+                try {
+                    // Remove invisible non-breaking space characters that cause JSON.parse errors
+                    const cleanJsonStr = dataScript.textContent.replace(/\u00A0/g, ' ').trim();
+                    if (cleanJsonStr) {
+                        const parsedData = JSON.parse(cleanJsonStr);
+                        projectData = Object.assign({}, projectData, parsedData);
+                        projectData.settings = Object.assign({}, projectData.settings, parsedData.settings || {});
+                        projectData.articles = parsedData.articles || projectData.articles;
+                    }
+                    cleanDataWithFarsiDigits(projectData);
+                } catch(e) { 
+                    console.error("خطا در خواندن داده‌های اولیه", e); 
+                }
+            }
             syncUIToData();
         }
 
@@ -984,7 +1044,8 @@
                     const doc = parser.parseFromString(htmlContent, 'text/html');
                     const dataScript = doc.getElementById('app-data');
                     if (dataScript) {
-                        projectData = JSON.parse(dataScript.textContent);
+                        const cleanJsonStr = dataScript.textContent.replace(/\u00A0/g, ' ').trim();
+                        projectData = JSON.parse(cleanJsonStr);
                         cleanDataWithFarsiDigits(projectData);
                         syncUIToData();
                         if (!isAuto) alert('✅ اطلاعات با موفقیت از سرور دریافت شد.');
@@ -1440,6 +1501,5 @@
             }
         }
     </script>
-
 
 </body></html>
