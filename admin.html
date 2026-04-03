@@ -123,10 +123,10 @@
 
     <div id="sync-overlay" style="display: none;">
         <div class="spinner"></div>
-        <h2 id="sync-text" style="font-weight: 700; margin:0;">در حال همگام‌سازی...</h2>
-        <p id="sync-subtext" style="opacity: 0.7; margin-top: 10px; font-weight: 300;">خواندن دیتابیس پنل مدیریت</p>
+        <h2 id="sync-text" style="font-weight: 700; margin:0;">در حال ذخیره پنل مدیریت...</h2>
+        <p id="sync-subtext" style="opacity: 0.7; margin-top: 10px; font-weight: 300;">ذخیره وضعیت داشبورد در سرور</p>
         <div class="progress-bar-container">
-            <div id="sync-progress-fill" class="progress-bar-fill" style="width: 100%;"></div>
+            <div id="sync-progress-fill" class="progress-bar-fill" style="width: 0%;"></div>
         </div>
     </div>
 
@@ -314,7 +314,6 @@
         var activeBlockId = null; 
         var draggedBlockId = null;
 
-        /* ===== FIX: انتخاب همه متن هنگام فوکوس برای فیلدهای دارای محتوای پیش‌فرض ===== */
         function selectAllIfDefault(el) {
             if (!el || !el.textContent.trim()) return;
             setTimeout(function() {
@@ -327,7 +326,6 @@
                 } catch(e) {}
             }, 0);
         }
-        /* ============================================================================= */
 
         function generateId() { return 'block_' + Math.random().toString(36).substr(2, 9); }
         function toggleAppTheme() { var isDark = document.documentElement.getAttribute('data-theme') === 'dark'; document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark'); localStorage.setItem('editor-theme', isDark ? 'light' : 'dark'); document.getElementById('appThemeBtn').innerText = isDark ? '🌙' : '☀️'; }
@@ -484,7 +482,6 @@
                     el.id = 'content-'+block.id; el.setAttribute('contenteditable', 'true'); el.innerHTML = block.content; el.style.textAlign = block.align || 'right';
                     var placeholder = 'متن پاراگراف...'; if(block.type === 'h2') placeholder = 'هدینگ اصلی H2...'; if(block.type === 'h3') placeholder = 'زیرهدینگ H3...'; if(block.type === 'h4') placeholder = 'هدینگ کوچک H4...'; if(block.type === 'quote') placeholder = 'متن نقل قول...';
                     el.setAttribute('data-placeholder', placeholder);
-                    /* FIX: انتخاب متن پیش‌فرض هنگام فوکوس */
                     el.onfocus = function(){ onBlockFocus(block.id); selectAllIfDefault(this); };
                     el.oninput = function(e){onBlockInput(block.id, e.target.innerHTML)}; el.onblur = function(){parseInlineFormatting('content-'+block.id, block.id, true)};
                     contentDiv.appendChild(el);
@@ -742,7 +739,7 @@
     <script id="app-data" type="application/json">{
     "settings": {
         "siteName": "وبلاگ حرفه‌ای من",
-        "headerTitle": "مجموعه مقالات",
+        "headerTitle": "مجموعه مقالات۴",
         "headerDesc": "برای ویرایش روی متن کلیک کنید. یک طراحی مینیمال برای ارائه بهتر محتوای شما.",
         "themeColor": "#111827",
         "bgImageBase64": "https://i.ibb.co/QFs0F46D/sdesign.jpg",
@@ -810,8 +807,7 @@
             </div>
             <input type="file" id="bgImageInput" class="hidden-file" accept="image/*" onchange="updateHeaderBg(this)">
             <div class="header-content">
-                <!-- FIX: onfocus برای انتخاب متن پیش‌فرض -->
-                <h1 id="live-title" contenteditable="true" data-placeholder="عنوان صفحه" onblur="updateState('headerTitle', this.innerText, this)" onfocus="selectAllIfDefaultHeader(this)">مجموعه مقالات</h1>
+                <h1 id="live-title" contenteditable="true" data-placeholder="عنوان صفحه" onblur="updateState('headerTitle', this.innerText, this)" onfocus="selectAllIfDefaultHeader(this)">مجموعه مقالات۴</h1>
                 <p id="live-desc" contenteditable="true" data-placeholder="توضیحات کوتاه..." onblur="updateState('headerDesc', this.innerText, this)" onfocus="selectAllIfDefaultHeader(this)">برای ویرایش روی متن کلیک کنید. یک طراحی مینیمال برای ارائه بهتر محتوای شما.</p>
             </div>
         </header>
@@ -874,7 +870,6 @@
             if (GITHUB_TOKEN) { fetchLatestDataFromServer(true); }
         };
 
-        /* ===== FIX: انتخاب کل متن در هدر ایندکس هنگام فوکوس ===== */
         function selectAllIfDefaultHeader(el) {
             if (!el || !el.innerText.trim()) return;
             setTimeout(function() {
@@ -887,7 +882,6 @@
                 } catch(e) {}
             }, 0);
         }
-        /* ======================================================== */
 
         function updateGitHubTokenUI() {
             const currentToken = localStorage.getItem('my_gh_token') || '';
@@ -970,7 +964,6 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 if (!isVisible) card.style.opacity = '0.8';
-                /* FIX: onfocus="selectAllIfDefaultHeader(this)" به فیلدهای کارت اضافه شد */
                 card.innerHTML = `
                     <div class="card-img" style="${bgStyle}">
                         ${!isVisible ? '<div style="position:absolute; top:15px; right:15px; background:#ef4444; color:white; padding:4px 10px; border-radius:12px; font-size:0.75rem; z-index:10; font-weight:bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">پیش‌نویس (مخفی)</div>' : ''}
@@ -1316,7 +1309,6 @@
             document.title = projectData.settings.siteName;
             document.getElementById('ctrl-siteName').value = projectData.settings.siteName;
 
-            /* FIX: اطمینان از اعمال صحیح متن هدر از سرور */
             const liveTitleEl = document.getElementById('live-title');
             const liveDescEl = document.getElementById('live-desc');
             if (liveTitleEl) liveTitleEl.innerText = projectData.settings.headerTitle || '';
@@ -1325,7 +1317,6 @@
             document.getElementById('ctrl-color').value = projectData.settings.themeColor;
             updateThemeColor(projectData.settings.themeColor);
 
-            /* FIX: اجرای applyHeaderBackground پس از رندر DOM */
             requestAnimationFrame(() => { applyHeaderBackground(); });
 
             if(projectData.settings.customFontBase64) document.getElementById('font-status').innerText = '✅ فونت شخصی فعال است';
@@ -1360,7 +1351,6 @@
             const originalText = btn ? btn.innerText : '';
             if (!isSilent && btn) { btn.innerText = '⏳ در حال ذخیره...'; btn.disabled = true; }
 
-            /* FIX: همگام‌سازی مقادیر DOM قبل از ذخیره */
             const liveTitleEl = document.getElementById('live-title');
             const liveDescEl = document.getElementById('live-desc');
             if (liveTitleEl && liveTitleEl.innerText.trim()) projectData.settings.headerTitle = liveTitleEl.innerText.trim();
@@ -1392,7 +1382,7 @@
         }
 
         async function publishIndexHTML(isSilent = false) {
-            /* FIX: همگام‌سازی مقادیر DOM هدر قبل از تولید ایندکس */
+            /* همگام‌سازی مقادیر DOM هدر قبل از تولید ایندکس */
             const liveTitleEl = document.getElementById('live-title');
             const liveDescEl = document.getElementById('live-desc');
             if (liveTitleEl && liveTitleEl.innerText.trim()) projectData.settings.headerTitle = liveTitleEl.innerText.trim();
@@ -1429,7 +1419,6 @@
                 });
             }
 
-            /* FIX: استفاده از background-image مستقیم روی header برای اطمینان از نمایش بنر */
             const headerBgStyle = set.bgImageBase64
                 ? `background-image: url('${set.bgImageBase64}'); background-size: cover; background-position: center;`
                 : '';
@@ -1481,12 +1470,31 @@
             const btn = document.getElementById('btn-publish-index');
             const originalText = btn ? btn.innerText : '';
             if (!isSilent && btn) { btn.innerText = '⏳ در حال انتشار...'; btn.disabled = true; }
+
             try {
+                /* ===== FIX: وقتی مستقیم فراخوانی می‌شود، ابتدا پنل ادمین هم ذخیره شود ===== */
+                if (!isSilent) {
+                    showLoading('در حال ذخیره پنل مدیریت...', 'ذخیره وضعیت داشبورد در سرور');
+                    await saveAdminPanelToGitHub(true);
+                    document.getElementById('sync-text').innerText = 'در حال انتشار صفحه اصلی...';
+                    document.getElementById('sync-subtext').innerText = 'به‌روزرسانی لیست مقالات سایت';
+                }
+                /* ========================================================================= */
+
                 const success = await uploadToGitHub(cleanHTML, 'index.html', 'Update index page');
-                if (!isSilent && btn) { btn.innerText = originalText; btn.disabled = false; if(success) alert('✅ صفحه اصلی با موفقیت به‌روزرسانی شد!'); }
+
+                if (!isSilent) {
+                    hideLoading();
+                    if (btn) { btn.innerText = originalText; btn.disabled = false; }
+                    if(success) alert('✅ پنل مدیریت و صفحه اصلی با موفقیت به‌روزرسانی شدند!');
+                }
                 return success;
             } catch(e) {
-                if (!isSilent && btn) { btn.innerText = originalText; btn.disabled = false; alert('خطا در انتشار ایندکس: ' + e.message); }
+                if (!isSilent) {
+                    hideLoading();
+                    if (btn) { btn.innerText = originalText; btn.disabled = false; }
+                    alert('خطا در انتشار ایندکس: ' + e.message);
+                }
                 return false;
             }
         }
