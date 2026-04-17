@@ -60,46 +60,46 @@
   },
   "archives": {
     "macro": {
-      "hash": "116gu76d17k",
-      "publishedAt": 1776438258147
+      "hash": "uv6bzv1ku9",
+      "publishedAt": 1776438306288
     },
     "banking": {
-      "hash": "synojahc6k",
-      "publishedAt": 1776438259770
+      "hash": "1obxgol9xch",
+      "publishedAt": 1776438307948
     },
     "markets": {
-      "hash": "1pxcy8ujb09",
-      "publishedAt": 1776438261669
+      "hash": "1zq7hgtrv9c",
+      "publishedAt": 1776438310149
     },
     "industry": {
-      "hash": "196j67vt1vi",
-      "publishedAt": 1776438263422
+      "hash": "714a3g46sn",
+      "publishedAt": 1776438312153
     },
     "housing": {
-      "hash": "2a9dk9cbfbp",
-      "publishedAt": 1776438265365
+      "hash": "15ihnw30jzc",
+      "publishedAt": 1776438314050
     },
     "world": {
-      "hash": "1rtfam6u4xi",
-      "publishedAt": 1776438267089
+      "hash": "1qun2edxqry",
+      "publishedAt": 1776438315882
     },
     "livelihood": {
-      "hash": "17ruysgmvjj",
-      "publishedAt": 1776438269101
+      "hash": "2ahlagbq6gd",
+      "publishedAt": 1776438317812
     }
   },
   "index": {
-    "hash": "17lkswbglx3",
-    "publishedAt": 1776438271196
+    "hash": "1dm9uzf69vf",
+    "publishedAt": 1776438320120
   },
   "fonts": [
     {
       "slot": 0,
-      "name": "فونت پیش‌فرض (وزیرمتن)",
-      "family": "Vazirmatn",
-      "fileName": "",
-      "uploaded": false,
-      "sha": ""
+      "name": "Anjoman-Medium",
+      "family": "CustomFont_0",
+      "fileName": "Anjoman-Medium.ttf",
+      "uploaded": true,
+      "sha": "a85c176ea7495b59c6b3d8a96c1caf015f68ac28"
     },
     {
       "slot": 1,
@@ -118,7 +118,7 @@
       "sha": ""
     }
   ],
-  "updatedAt": 1776438243469,
+  "updatedAt": 1776438301880,
   "settings": {
     "siteTitle": "پایگاه خبری اقتصاد",
     "brandColor": "#c41e3a",
