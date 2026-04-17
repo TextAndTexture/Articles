@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "articles": {
+    "1776438212720001": {
+      "id": 1776438212720001,
+      "title": "رشد ۲.۵ درصدی شاخص کل بورس در معاملات امروز",
+      "category": "markets",
+      "hash": "1kgfwgukglk",
+      "publishedAt": 1776438245159
+    },
+    "1776438212720002": {
+      "id": 1776438212720002,
+      "title": "بانک مرکزی: نرخ تورم نقطه‌ای به ۳۲ درصد رسید",
+      "category": "macro",
+      "hash": "fnns3swbth",
+      "publishedAt": 1776438246760
+    },
+    "1776438212720003": {
+      "id": 1776438212720003,
+      "title": "افزایش ۱۵ درصدی صادرات غیرنفتی",
+      "category": "industry",
+      "hash": "1hj4il1ungg",
+      "publishedAt": 1776438248364
+    },
+    "1776438212720004": {
+      "id": 1776438212720004,
+      "title": "قیمت مسکن در تهران از متری ۱۰۰ میلیون گذشت",
+      "category": "housing",
+      "hash": "20d9jhmb06d",
+      "publishedAt": 1776438250023
+    },
+    "1776438212720005": {
+      "id": 1776438212720005,
+      "title": "دلار به کانال ۸۵ هزار تومان بازگشت",
+      "category": "markets",
+      "hash": "1wp5t1h77l1",
+      "publishedAt": 1776438251510
+    },
+    "1776438212720006": {
+      "id": 1776438212720006,
+      "title": "افزایش حقوق بازنشستگان از اردیبهشت",
+      "category": "livelihood",
+      "hash": "dgsq2bdr22",
+      "publishedAt": 1776438252998
+    },
+    "1776438212720007": {
+      "id": 1776438212720007,
+      "title": "سقوط بازارهای آسیایی",
+      "category": "world",
+      "hash": "1gvblkz0ghl",
+      "publishedAt": 1776438254528
+    },
+    "1776438212720008": {
+      "id": 1776438212720008,
+      "title": "کاهش نرخ سود بین‌بانکی به ۲۲ درصد",
+      "category": "banking",
+      "hash": "12a1azlqmd3",
+      "publishedAt": 1776438255998
+    }
+  },
+  "archives": {
+    "macro": {
+      "hash": "116gu76d17k",
+      "publishedAt": 1776438258147
+    },
+    "banking": {
+      "hash": "synojahc6k",
+      "publishedAt": 1776438259770
+    },
+    "markets": {
+      "hash": "1pxcy8ujb09",
+      "publishedAt": 1776438261669
+    },
+    "industry": {
+      "hash": "196j67vt1vi",
+      "publishedAt": 1776438263422
+    },
+    "housing": {
+      "hash": "2a9dk9cbfbp",
+      "publishedAt": 1776438265365
+    },
+    "world": {
+      "hash": "1rtfam6u4xi",
+      "publishedAt": 1776438267089
+    },
+    "livelihood": {
+      "hash": "17ruysgmvjj",
+      "publishedAt": 1776438269101
+    }
+  },
+  "index": {
+    "hash": "17lkswbglx3",
+    "publishedAt": 1776438271196
+  },
+  "fonts": [
+    {
+      "slot": 0,
+      "name": "فونت پیش‌فرض (وزیرمتن)",
+      "family": "Vazirmatn",
+      "fileName": "",
+      "uploaded": false,
+      "sha": ""
+    },
+    {
+      "slot": 1,
+      "name": "فونت دوم (انتخاب نشده)",
+      "family": null,
+      "fileName": "",
+      "uploaded": false,
+      "sha": ""
+    },
+    {
+      "slot": 2,
+      "name": "فونت سوم (انتخاب نشده)",
+      "family": null,
+      "fileName": "",
+      "uploaded": false,
+      "sha": ""
+    }
+  ],
+  "updatedAt": 1776438243469,
+  "settings": {
+    "siteTitle": "پایگاه خبری اقتصاد",
+    "brandColor": "#c41e3a",
+    "highlightColor": "#c41e3a",
+    "metaDesc": "",
+    "metaKeywords": ""
+  },
+  "articlesPerSection": 6,
+  "tickerEnabled": true,
+  "tickerSpeed": 30
+}
